@@ -21,6 +21,7 @@ export default function MapView({ layers }: MapViewProps) {
       initialViewState={INITIAL_VIEW_STATE}
       mapStyle={MAP_STYLE}
       style={{ width: '100%', height: '100%' }}
+      cursor="auto"
     >
       <DeckOverlay layers={layers} />
     </Map>

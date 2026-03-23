@@ -5,6 +5,19 @@ const FUEL_TYPE_LABEL = Object.fromEntries(
   Object.entries(FuelType).map(([name, id]) => [id, name]),
 ) as Record<number, string>;
 
+const FUEL_TYPE_ICON: Record<number, string> = {
+  [FuelType.Gas]: '🔥',
+  [FuelType.Coal]: '⛏️',
+  [FuelType.Biomass]: '🌱',
+  [FuelType.Nuclear]: '⚛️',
+  [FuelType.Hydro]: '💧',
+  [FuelType.Imports]: '🔌',
+  [FuelType.Wind]: '💨',
+  [FuelType.Solar]: '☀️',
+  [FuelType.Storage]: '🔋',
+  [FuelType.Other]: '⚡',
+};
+
 const INTENSITY_INDEX_LABEL: Record<number, string> = {
   [CarbonIntensityIndex.VeryLow]: 'Very Low',
   [CarbonIntensityIndex.Low]: 'Low',
@@ -52,7 +65,12 @@ export default function NationalSummary({ data }: NationalSummaryProps) {
         {sorted
           .filter((e) => e.percentage > 0)
           .map((entry) => (
-            <div key={entry.fuelType} style={mixItemStyle}>
+            <div
+              key={entry.fuelType}
+              style={mixItemStyle}
+              title={FUEL_TYPE_LABEL[entry.fuelType] ?? 'Other'}
+            >
+              <span style={mixIconStyle}>{FUEL_TYPE_ICON[entry.fuelType] ?? '⚡'}</span>
               <span style={mixPercentStyle}>{entry.percentage.toFixed(1)}%</span>
               <span style={mixLabelStyle}>{FUEL_TYPE_LABEL[entry.fuelType] ?? 'Other'}</span>
             </div>
@@ -114,6 +132,10 @@ const mixItemStyle: React.CSSProperties = {
   flexDirection: 'column',
   alignItems: 'center',
   minWidth: 50,
+};
+
+const mixIconStyle: React.CSSProperties = {
+  fontSize: 16,
 };
 
 const mixPercentStyle: React.CSSProperties = {

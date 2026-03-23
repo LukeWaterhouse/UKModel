@@ -5,6 +5,19 @@ const FUEL_TYPE_LABEL = Object.fromEntries(
   Object.entries(FuelType).map(([name, id]) => [id, name]),
 ) as Record<number, string>;
 
+const FUEL_TYPE_ICON: Record<number, string> = {
+  [FuelType.Gas]: '🔥',
+  [FuelType.Coal]: '⛏️',
+  [FuelType.Biomass]: '🌱',
+  [FuelType.Nuclear]: '⚛️',
+  [FuelType.Hydro]: '💧',
+  [FuelType.Imports]: '🔌',
+  [FuelType.Wind]: '💨',
+  [FuelType.Solar]: '☀️',
+  [FuelType.Storage]: '🔋',
+  [FuelType.Other]: '⚡',
+};
+
 const DNO_REGION_LABEL: Record<number, string> = {
   [DnoRegion.ScottishHydroElectric]: 'Scottish Hydro Electric Power Distribution',
   [DnoRegion.SpDistribution]: 'SP Distribution',
@@ -89,7 +102,10 @@ export default function RegionDetailPanel({ region, regionName, pinned, onUnpin 
               {[...region.generationMix]
                 .sort((a, b) => b.percentage - a.percentage)
                 .map((entry) => (
-                  <li key={entry.fuelType} style={listItemStyle}>
+                  <li key={entry.fuelType} style={listItemStyle} title={FUEL_TYPE_LABEL[entry.fuelType] ?? 'Other'}>
+                    <span style={fuelIconStyle}>
+                      {FUEL_TYPE_ICON[entry.fuelType] ?? '⚡'}
+                    </span>
                     <span style={fuelLabelStyle}>
                       {FUEL_TYPE_LABEL[entry.fuelType] ?? 'Other'}
                     </span>
@@ -205,6 +221,12 @@ const listItemStyle: React.CSSProperties = {
   alignItems: 'center',
   gap: 8,
   fontSize: 13,
+};
+
+const fuelIconStyle: React.CSSProperties = {
+  fontSize: 14,
+  width: 20,
+  flexShrink: 0,
 };
 
 const fuelLabelStyle: React.CSSProperties = {

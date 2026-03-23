@@ -94,6 +94,7 @@ export default function MapPage() {
   const [pinnedRegionName, setPinnedRegionName] = useState<string | null>(null);
   const [pinnedRegionKey, setPinnedRegionKey] = useState<string | null>(null);
   const [nationalMix, setNationalMix] = useState<NationalGenerationMixResponse | null>(null);
+  const [showIntensityLayer, setShowIntensityLayer] = useState(true);
 
   useEffect(() => {
     fetchRegionalIntensity()
@@ -152,47 +153,68 @@ export default function MapPage() {
   );
 
   const layers = useMemo(() => {
-    return [
-      new GeoJsonLayer({
-        id: 'regional-intensity',
-        data: regionsGeoJson,
-        filled: true,
-        stroked: true,
-        getFillColor: (f) => {
-          const key = f.properties.regionType;
-          const region = lookup.get(key);
-          if (!region) return [128, 128, 128, 100];
-          const base = indexToColor(region.intensity.index, region.intensity.actual, region.intensity.forecast);
-          if (pinnedRegionKey === key) return [base[0], base[1], base[2], 255] as [number, number, number, number];
-          return base;
-        },
-        getLineColor: (f) => {
-          if (pinnedRegionKey === f.properties.regionType) return [255, 255, 255, 220];
-          return [40, 40, 40, 200];
-        },
-        getLineWidth: (f) => {
-          if (pinnedRegionKey === f.properties.regionType) return 3;
-          return 1;
-        },
-        lineWidthMinPixels: 1,
-        pickable: true,
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 10],
-        onHover,
-        onClick,
-        updateTriggers: {
-          getFillColor: [regions, pinnedRegionKey],
-          getLineColor: [pinnedRegionKey],
-          getLineWidth: [pinnedRegionKey],
-        },
-        transitions: {
-          getFillColor: { duration: 800 },
-          getLineColor: { duration: 300 },
-          getLineWidth: { duration: 300 },
-        },
-      }),
-    ];
-  }, [regions, lookup, onHover, onClick, pinnedRegionKey]);
+    const result: GeoJsonLayer[] = [];
+
+    if (!showIntensityLayer) return result;
+
+    const base = new GeoJsonLayer({
+      id: 'regional-intensity',
+      data: regionsGeoJson,
+      filled: true,
+      stroked: true,
+      getFillColor: (f) => {
+        const key = f.properties.regionType;
+        const region = lookup.get(key);
+        if (!region) return [128, 128, 128, 100];
+        const color = indexToColor(region.intensity.index, region.intensity.actual, region.intensity.forecast);
+        if (pinnedRegionKey === key) return [color[0], color[1], color[2], 255] as [number, number, number, number];
+        return color;
+      },
+      getLineColor: [40, 40, 40, 200],
+      getLineWidth: 1,
+      lineWidthMinPixels: 1,
+      pickable: true,
+      autoHighlight: true,
+      highlightColor: [255, 255, 255, 10],
+      onHover,
+      onClick,
+      updateTriggers: {
+        getFillColor: [regions, pinnedRegionKey],
+      },
+      transitions: {
+        getFillColor: { duration: 800 },
+      },
+    });
+
+    result.push(base);
+
+    // Render pinned highlight as a separate layer on top so neighbouring
+    // region polygons can't paint over the white border.
+    if (pinnedRegionKey) {
+      const pinnedFeature = (regionsGeoJson as any).features?.filter(
+        (f: any) => f.properties?.regionType === pinnedRegionKey,
+      );
+      if (pinnedFeature?.length) {
+        result.push(
+          new GeoJsonLayer({
+            id: 'pinned-highlight',
+            data: { type: 'FeatureCollection', features: pinnedFeature },
+            filled: false,
+            stroked: true,
+            getLineColor: [255, 255, 255, 220],
+            getLineWidth: 3,
+            lineWidthMinPixels: 2,
+            pickable: false,
+            updateTriggers: {
+              getLineColor: [pinnedRegionKey],
+            },
+          }),
+        );
+      }
+    }
+
+    return result;
+  }, [regions, lookup, onHover, onClick, pinnedRegionKey, showIntensityLayer]);
 
   return (
     <div style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}>
@@ -208,6 +230,65 @@ export default function MapPage() {
           onUnpin={() => { setPinnedRegion(null); setPinnedRegionName(null); setPinnedRegionKey(null); }}
         />
       </div>
+
+      <div style={layerPanelStyle}>
+        <h3 style={layerPanelTitleStyle}>Layers</h3>
+        <div style={layerSectionStyle}>
+          <h4 style={layerSectionTitleStyle}>Energy</h4>
+          <label style={layerToggleStyle}>
+            <input
+              type="checkbox"
+              checked={showIntensityLayer}
+              onChange={(e) => setShowIntensityLayer(e.target.checked)}
+              style={checkboxStyle}
+            />
+            Carbon Intensity
+          </label>
+        </div>
+      </div>
     </div>
   );
 }
+
+const layerPanelStyle: React.CSSProperties = {
+  backgroundColor: '#1a1a2e',
+  color: '#e0e0e0',
+  padding: '12px 16px',
+  borderTop: '1px solid #333',
+  borderRadius: '0 0 8px 8px',
+};
+
+const layerPanelTitleStyle: React.CSSProperties = {
+  margin: '0 0 8px',
+  fontSize: 14,
+  fontWeight: 600,
+  color: '#fff',
+};
+
+const layerSectionStyle: React.CSSProperties = {
+  marginLeft: 4,
+};
+
+const layerSectionTitleStyle: React.CSSProperties = {
+  margin: '0 0 6px',
+  fontSize: 12,
+  fontWeight: 500,
+  color: '#999',
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+};
+
+const layerToggleStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  fontSize: 13,
+  cursor: 'pointer',
+};
+
+const checkboxStyle: React.CSSProperties = {
+  accentColor: '#4a9eff',
+  width: 16,
+  height: 16,
+  cursor: 'pointer',
+};
