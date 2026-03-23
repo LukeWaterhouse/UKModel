@@ -45,16 +45,25 @@ const INTENSITY_INDEX_COLOR: Record<number, string> = {
 interface RegionDetailPanelProps {
   region: RegionIntensity | null;
   regionName: string | null;
+  pinned?: boolean;
+  onUnpin?: () => void;
 }
 
-export default function RegionDetailPanel({ region, regionName }: RegionDetailPanelProps) {
+export default function RegionDetailPanel({ region, regionName, pinned, onUnpin }: RegionDetailPanelProps) {
   return (
     <div style={panelStyle}>
       {!region ? (
         <p style={placeholderStyle}>Hover over a region to see details</p>
       ) : (
         <>
-          <h3 style={titleStyle}>{regionName ?? 'Unknown Region'}</h3>
+          <div style={titleRowStyle}>
+            <h3 style={titleStyle}>{regionName ?? 'Unknown Region'}</h3>
+            {pinned && (
+              <button onClick={onUnpin} style={unpinButtonStyle} title="Unpin region">
+                ✕
+              </button>
+            )}
+          </div>
           <p style={subtitleStyle}>{DNO_REGION_LABEL[region.dnoRegion] ?? 'Unknown DNO'}</p>
 
           <div style={sectionStyle}>
@@ -122,11 +131,26 @@ const placeholderStyle: React.CSSProperties = {
   fontSize: 14,
 };
 
+const titleRowStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+};
+
 const titleStyle: React.CSSProperties = {
   margin: '0 0 2px',
   fontSize: 18,
   fontWeight: 600,
   color: '#fff',
+};
+
+const unpinButtonStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  color: '#888',
+  fontSize: 16,
+  cursor: 'pointer',
+  padding: '0 4px',
 };
 
 const subtitleStyle: React.CSSProperties = {

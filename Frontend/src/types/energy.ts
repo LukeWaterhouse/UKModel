@@ -27,5 +27,6 @@ export interface RegionalIntensityResponse {
 export interface NationalGenerationMixResponse {
   from: string;
   to: string;
+  intensity: IntensityData;
   mix: GenerationMixEntry[];
 }

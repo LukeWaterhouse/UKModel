@@ -26,7 +26,7 @@ public class EnergyController(
         return Ok(response);
     }
 
-    [HttpGet("generation")]
+    [HttpGet("national")]
     public async Task<ActionResult<NationalGenerationMixResponse>> GetNationalGenerationMix(CancellationToken cancellationToken)
     {
         var mix = await nationalService.GetCurrentMixAsync(cancellationToken);
@@ -34,6 +34,7 @@ public class EnergyController(
         var response = new NationalGenerationMixResponse(
             From: mix.From,
             To: mix.To,
+            Intensity: mix.Intensity.FromDomain(),
             Mix: mix.Mix.Select(m => m.FromDomain()).ToList());
 
         return Ok(response);

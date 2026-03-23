@@ -24,4 +24,11 @@ internal sealed class CarbonIntensityApiClient(HttpClient httpClient)
         return await httpClient.GetFromJsonAsync<CarbonIntensityGenerationResponse>(
             "generation", JsonOptions, cancellationToken);
     }
+
+    public async Task<CarbonIntensityNationalResponse?> GetNationalIntensityAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetFromJsonAsync<CarbonIntensityNationalResponse>(
+            "intensity/date", JsonOptions, cancellationToken);
+    }
 }

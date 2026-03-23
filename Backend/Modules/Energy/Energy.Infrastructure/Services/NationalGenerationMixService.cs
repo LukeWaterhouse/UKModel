@@ -11,11 +11,23 @@ internal sealed class NationalGenerationMixService(
     public async Task<NationalGenerationMix> GetCurrentMixAsync(
         CancellationToken cancellationToken = default)
     {
-        var response = await client.GetNationalGenerationMixAsync(cancellationToken);
-        if (response?.Data == null || response.Data.Count == 0)
-            return new NationalGenerationMix(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []);
+        var generationTask = client.GetNationalGenerationMixAsync(cancellationToken);
+        var intensityTask = client.GetNationalIntensityAsync(cancellationToken);
 
-        var firstItem = response.Data[0];
-        return firstItem.ToDomain();
+        await Task.WhenAll(generationTask, intensityTask);
+
+        var generationResponse = await generationTask;
+        var intensityResponse = await intensityTask;
+
+        var intItem = intensityResponse?.Data?.FirstOrDefault();
+        var intensity = intItem != null
+            ? intItem.Intensity.ToDomain()
+            : new CarbonIntensity(0, null, CarbonIntensityIndex.Moderate);
+
+        var genItem = generationResponse?.Data;
+        if (genItem == null)
+            return new NationalGenerationMix(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, intensity, []);
+
+        return genItem.ToDomain(intensity);
     }
 }

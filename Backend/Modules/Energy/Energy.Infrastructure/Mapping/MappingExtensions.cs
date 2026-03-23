@@ -16,11 +16,15 @@ internal static class MappingExtensions
             GenerationMix: r.GenerationMix.ToDomain());
     }
 
-    public static NationalGenerationMix ToDomain(this GenerationDataItem item) =>
+    public static NationalGenerationMix ToDomain(this GenerationDataItem item, CarbonIntensity intensity) =>
         new(
             From: DateTimeOffset.Parse(item.From),
             To: DateTimeOffset.Parse(item.To),
+            Intensity: intensity,
             Mix: item.GenerationMix.ToDomain());
+
+    internal static CarbonIntensity ToDomain(this IntensityItem item) =>
+        new(item.Forecast, item.Actual, item.Index.ToCarbonIntensityIndex());
 
 
     private static IReadOnlyList<GenerationMixEntry> ToDomain(this List<GenerationMixItem> items) =>
