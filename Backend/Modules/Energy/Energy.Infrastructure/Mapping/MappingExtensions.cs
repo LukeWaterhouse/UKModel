@@ -12,7 +12,6 @@ internal static class MappingExtensions
         return new(
             DnoRegion: r.DnoRegion,
             Region: regionType,
-            Coordinate: regionType.GetCoordinate(),
             Intensity: new CarbonIntensity(r.Intensity.Forecast, r.Intensity.Actual, r.Intensity.Index.ToCarbonIntensityIndex()),
             GenerationMix: r.GenerationMix.ToDomain());
     }
@@ -48,7 +47,7 @@ internal static class MappingExtensions
         "North West England" => GridRegionType.NorthWestEngland,
         "North East England" => GridRegionType.NorthEastEngland,
         "Yorkshire" => GridRegionType.Yorkshire,
-        "North Wales" => GridRegionType.NorthWales,
+        "North Wales" or "North Wales & Merseyside" => GridRegionType.NorthWales,
         "South Wales" => GridRegionType.SouthWales,
         "West Midlands" => GridRegionType.WestMidlands,
         "East Midlands" => GridRegionType.EastMidlands,

@@ -11,7 +11,6 @@ public static class MappingExtensions
         return new RegionDto(
             RegionType: region.Region.FromDomain(),
             DnoRegion: region.DnoRegion,
-            Coordinate: region.Coordinate.FromDomain(),
             Intensity: new IntensityDto(
                 region.Intensity.Forecast,
                 region.Intensity.Actual,
@@ -26,9 +25,6 @@ public static class MappingExtensions
 
     public static GenerationMixEntryDto FromDomain(this GenerationMixEntry entry) =>
         new(entry.Fuel.FromDomain(), entry.Percentage);
-
-    private static CoordinateDto FromDomain(this Coordinate coordinate) =>
-        new(coordinate.Longitude, coordinate.Latitude);
 
     private static FuelTypeDto FromDomain(this FuelType fuelType) => fuelType switch
     {

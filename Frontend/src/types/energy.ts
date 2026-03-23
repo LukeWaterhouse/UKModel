@@ -1,20 +1,20 @@
+import type { CarbonIntensityIndex, FuelType, GridRegionType } from './enums';
+
 export interface GenerationMixEntry {
-  fuel: string;
+  fuelType: FuelType;
   percentage: number;
 }
 
 export interface IntensityData {
   forecast: number;
   actual: number | null;
-  index: string;
+  index: CarbonIntensityIndex;
+  unit: string;
 }
 
 export interface RegionIntensity {
-  regionId: number;
-  name: string;
+  regionType: GridRegionType;
   dnoRegion: string;
-  longitude: number;
-  latitude: number;
   intensity: IntensityData;
   generationMix: GenerationMixEntry[];
 }

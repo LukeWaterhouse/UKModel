@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScatterplotLayer } from '@deck.gl/layers';
+import { GeoJsonLayer } from '@deck.gl/layers';
 import MapView from '../components/map/MapView';
 import { fetchRegionalIntensity } from '../services/energyService';
 import type { RegionIntensity } from '../types/energy';
+import { CarbonIntensityIndex, GridRegionType } from '../types/enums';
+import regionsGeoJson from '../assets/uk-grid-regions.geojson';
 
-const INTENSITY_COLOR_MAP: Record<string, [number, number, number, number]> = {
-  'very low': [0, 200, 0, 200],
-  'low': [100, 220, 50, 200],
-  'moderate': [255, 200, 0, 200],
-  'high': [255, 100, 0, 200],
-  'very high': [255, 30, 30, 200],
+const REGION_ID_TO_NAME = Object.fromEntries(
+  Object.entries(GridRegionType).map(([name, id]) => [id, name]),
+) as Record<number, string>;
+
+const INTENSITY_COLOR_MAP: Record<number, [number, number, number, number]> = {
+  [CarbonIntensityIndex.VeryLow]: [0, 200, 0, 200],
+  [CarbonIntensityIndex.Low]: [100, 220, 50, 200],
+  [CarbonIntensityIndex.Moderate]: [255, 200, 0, 200],
+  [CarbonIntensityIndex.High]: [255, 100, 0, 200],
+  [CarbonIntensityIndex.VeryHigh]: [255, 30, 30, 200],
 };
 
 export default function MapPage() {
@@ -21,25 +27,37 @@ export default function MapPage() {
       .catch(console.error);
   }, []);
 
-  const layers = useMemo(
-    () => [
-      new ScatterplotLayer<RegionIntensity>({
+  const layers = useMemo(() => {
+    const lookup = new Map<string, RegionIntensity>();
+    for (const r of regions) {
+      const name = REGION_ID_TO_NAME[r.regionType];
+      if (name) lookup.set(name, r);
+    }
+
+    return [
+      new GeoJsonLayer({
         id: 'regional-intensity',
-        data: regions,
-        getPosition: (d) => [d.longitude, d.latitude],
-        getRadius: (d) => d.intensity.forecast * 100,
-        getFillColor: (d) =>
-          INTENSITY_COLOR_MAP[d.intensity.index] ?? [128, 128, 128, 180],
-        radiusMinPixels: 8,
-        radiusMaxPixels: 40,
+        data: regionsGeoJson,
+        filled: true,
+        stroked: true,
+        getFillColor: (f) => {
+          const region = lookup.get(f.properties.regionType);
+          if (!region) return [128, 128, 128, 100];
+          return INTENSITY_COLOR_MAP[region.intensity.index] ?? [128, 128, 128, 180];
+        },
+        getLineColor: [40, 40, 40, 200],
+        getLineWidth: 1,
+        lineWidthMinPixels: 1,
         pickable: true,
+        updateTriggers: {
+          getFillColor: [regions],
+        },
       }),
-    ],
-    [regions],
-  );
+    ];
+  }, [regions]);
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: '100%', height: '600px', borderRadius: '8px', overflow: 'hidden' }}>
       <MapView layers={layers} />
     </div>
   );
