@@ -40,6 +40,52 @@ const INTENSITY_COLOR_MAP: Record<number, [number, number, number, number]> = {
   [CarbonIntensityIndex.VeryHigh]: [255, 30, 30, 200],
 };
 
+// Convert HSL (hue 0-360, saturation 0-100, lightness 0-100) to RGB [0-255, 0-255, 0-255].
+// Uses the analytical HSL→RGB formula without branching on hue sextants.
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  s /= 100;
+  l /= 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+
+// Map a backend intensity index (0–4) to an RGBA color using an HSL gradient.
+// The index is the authority — it picks the color band (green/lime/yellow/orange/red).
+// The continuous value (actual if available, otherwise forecast) shades within that band
+// for visual nuance — regions with the same index but different values look subtly different.
+//
+// Band thresholds (from Carbon Intensity API):
+//   VeryLow: 0–50, Low: 51–100, Moderate: 101–200, High: 201–300, VeryHigh: 301+
+//
+// Hue:        120° (green) → 0° (red), spread across and within index bands.
+// Saturation: 80% → 90%, slightly more vivid at the red/dangerous end.
+// Lightness:  48% → 38%, darker towards red so high-carbon regions feel more ominous.
+const BAND_RANGES: Record<number, [number, number]> = {
+  [CarbonIntensityIndex.VeryLow]:  [0, 50],
+  [CarbonIntensityIndex.Low]:      [51, 100],
+  [CarbonIntensityIndex.Moderate]: [101, 200],
+  [CarbonIntensityIndex.High]:     [201, 300],
+  [CarbonIntensityIndex.VeryHigh]: [301, 400],
+};
+
+function indexToColor(index: number, actual: number | null, forecast: number): [number, number, number, number] {
+  const band = BAND_RANGES[index];
+  const value = actual ?? forecast;
+  // Position within the band (0–1)
+  const bandT = band
+    ? Math.min(1, Math.max(0, (value - band[0]) / (band[1] - band[0])))
+    : 0.5;
+  // Combine index step + sub-band position for a continuous 0–1 value across all 5 bands
+  const t = (Math.min(index, 4) + bandT) / 5;
+  const hue = 120 * (1 - t);
+  const sat = 80 + t * 10;
+  const lit = 48 - t * 10;
+  const [r, g, b] = hslToRgb(hue, sat, lit);
+  return [r, g, b, 200];
+}
+
 export default function MapPage() {
   const [regions, setRegions] = useState<RegionIntensity[]>([]);
   const [hoveredRegion, setHoveredRegion] = useState<RegionIntensity | null>(null);
@@ -116,7 +162,7 @@ export default function MapPage() {
           const key = f.properties.regionType;
           const region = lookup.get(key);
           if (!region) return [128, 128, 128, 100];
-          const base = INTENSITY_COLOR_MAP[region.intensity.index] ?? [128, 128, 128, 180];
+          const base = indexToColor(region.intensity.index, region.intensity.actual, region.intensity.forecast);
           if (pinnedRegionKey === key) return [base[0], base[1], base[2], 255] as [number, number, number, number];
           return base;
         },
@@ -138,6 +184,11 @@ export default function MapPage() {
           getFillColor: [regions, pinnedRegionKey],
           getLineColor: [pinnedRegionKey],
           getLineWidth: [pinnedRegionKey],
+        },
+        transitions: {
+          getFillColor: { duration: 800 },
+          getLineColor: { duration: 300 },
+          getLineWidth: { duration: 300 },
         },
       }),
     ];
