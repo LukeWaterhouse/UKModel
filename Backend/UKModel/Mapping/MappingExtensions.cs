@@ -10,7 +10,7 @@ public static class MappingExtensions
     {
         return new RegionDto(
             RegionType: region.Region.FromDomain(),
-            DnoRegion: region.DnoRegion,
+            DnoRegion: region.DnoRegion.FromDomain(),
             Intensity: new IntensityDto(
                 region.Intensity.Forecast,
                 region.Intensity.Actual,
@@ -22,6 +22,8 @@ public static class MappingExtensions
     }
 
     private static GridRegionTypeDto FromDomain(this GridRegionType domainType) => (GridRegionTypeDto)(int)domainType;
+
+    private static DnoRegionDto FromDomain(this DnoRegion dnoRegion) => (DnoRegionDto)(int)dnoRegion;
 
     public static GenerationMixEntryDto FromDomain(this GenerationMixEntry entry) =>
         new(entry.Fuel.FromDomain(), entry.Percentage);

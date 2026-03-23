@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import MapView from '../components/map/MapView';
+import RegionDetailPanel from '../components/map/RegionDetailPanel';
 import { fetchRegionalIntensity } from '../services/energyService';
 import type { RegionIntensity } from '../types/energy';
 import { CarbonIntensityIndex, GridRegionType } from '../types/enums';
@@ -9,6 +10,26 @@ import regionsGeoJson from '../assets/uk-grid-regions.geojson';
 const REGION_ID_TO_NAME = Object.fromEntries(
   Object.entries(GridRegionType).map(([name, id]) => [id, name]),
 ) as Record<number, string>;
+
+const REGION_DISPLAY_NAME: Record<string, string> = {
+  NorthScotland: 'North Scotland',
+  SouthScotland: 'South Scotland',
+  NorthWestEngland: 'North West England',
+  NorthEastEngland: 'North East England',
+  Yorkshire: 'Yorkshire',
+  NorthWales: 'North Wales',
+  SouthWales: 'South Wales',
+  WestMidlands: 'West Midlands',
+  EastMidlands: 'East Midlands',
+  EastEngland: 'East England',
+  SouthWestEngland: 'South West England',
+  SouthEngland: 'South England',
+  London: 'London',
+  SouthEastEngland: 'South East England',
+  England: 'England',
+  Scotland: 'Scotland',
+  Wales: 'Wales',
+};
 
 const INTENSITY_COLOR_MAP: Record<number, [number, number, number, number]> = {
   [CarbonIntensityIndex.VeryLow]: [0, 200, 0, 200],
@@ -20,6 +41,8 @@ const INTENSITY_COLOR_MAP: Record<number, [number, number, number, number]> = {
 
 export default function MapPage() {
   const [regions, setRegions] = useState<RegionIntensity[]>([]);
+  const [hoveredRegion, setHoveredRegion] = useState<RegionIntensity | null>(null);
+  const [hoveredRegionName, setHoveredRegionName] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRegionalIntensity()
@@ -27,13 +50,31 @@ export default function MapPage() {
       .catch(console.error);
   }, []);
 
-  const layers = useMemo(() => {
-    const lookup = new Map<string, RegionIntensity>();
+  const lookup = useMemo(() => {
+    const map = new Map<string, RegionIntensity>();
     for (const r of regions) {
       const name = REGION_ID_TO_NAME[r.regionType];
-      if (name) lookup.set(name, r);
+      if (name) map.set(name, r);
     }
+    return map;
+  }, [regions]);
 
+  const onHover = useCallback(
+    (info: { object?: { properties?: { regionType?: string } } }) => {
+      const regionKey = info.object?.properties?.regionType ?? null;
+      if (regionKey) {
+        const region = lookup.get(regionKey) ?? null;
+        setHoveredRegion(region);
+        setHoveredRegionName(REGION_DISPLAY_NAME[regionKey] ?? regionKey);
+      } else {
+        setHoveredRegion(null);
+        setHoveredRegionName(null);
+      }
+    },
+    [lookup],
+  );
+
+  const layers = useMemo(() => {
     return [
       new GeoJsonLayer({
         id: 'regional-intensity',
@@ -49,16 +90,22 @@ export default function MapPage() {
         getLineWidth: 1,
         lineWidthMinPixels: 1,
         pickable: true,
+        autoHighlight: true,
+        highlightColor: [255, 255, 255, 10],
+        onHover,
         updateTriggers: {
           getFillColor: [regions],
         },
       }),
     ];
-  }, [regions]);
+  }, [regions, lookup, onHover]);
 
   return (
-    <div style={{ width: '100%', height: '600px', borderRadius: '8px', overflow: 'hidden' }}>
-      <MapView layers={layers} />
+    <div style={{ display: 'flex', width: '100%', height: '600px', borderRadius: '8px', overflow: 'hidden' }}>
+      <div style={{ flex: 1, position: 'relative' }}>
+        <MapView layers={layers} />
+      </div>
+      <RegionDetailPanel region={hoveredRegion} regionName={hoveredRegionName} />
     </div>
   );
 }

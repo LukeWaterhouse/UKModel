@@ -10,7 +10,7 @@ internal static class MappingExtensions
     {
         var regionType = r.ShortName.ToGridRegionType();
         return new(
-            DnoRegion: r.DnoRegion,
+            DnoRegion: r.DnoRegion.ToDnoRegion(),
             Region: regionType,
             Intensity: new CarbonIntensity(r.Intensity.Forecast, r.Intensity.Actual, r.Intensity.Index.ToCarbonIntensityIndex()),
             GenerationMix: r.GenerationMix.ToDomain());
@@ -60,6 +60,29 @@ internal static class MappingExtensions
         "Scotland" => GridRegionType.Scotland,
         "Wales" => GridRegionType.Wales,
         _ => GridRegionType.England
+    };
+
+    private static DnoRegion ToDnoRegion(this string dnoRegion) => dnoRegion switch
+    {
+        "Scottish Hydro Electric Power Distribution" => DnoRegion.ScottishHydroElectric,
+        "SP Distribution" => DnoRegion.SpDistribution,
+        "Electricity North West" => DnoRegion.ElectricityNorthWest,
+        "NPG North East" => DnoRegion.NpgNorthEast,
+        "NPG Yorkshire" => DnoRegion.NpgYorkshire,
+        "SP Manweb" => DnoRegion.SpManweb,
+        "WPD South Wales" => DnoRegion.WpdSouthWales,
+        "WPD West Midlands" => DnoRegion.WpdWestMidlands,
+        "WPD East Midlands" => DnoRegion.WpdEastMidlands,
+        "UKPN East" => DnoRegion.UkpnEast,
+        "WPD South West" => DnoRegion.WpdSouthWest,
+        "SSE South" => DnoRegion.SseSouth,
+        "UKPN London" => DnoRegion.UkpnLondon,
+        "UKPN South East" => DnoRegion.UkpnSouthEast,
+        "England" => DnoRegion.England,
+        "Scotland" => DnoRegion.Scotland,
+        "Wales" => DnoRegion.Wales,
+        "GB" => DnoRegion.Gb,
+        _ => DnoRegion.Gb
     };
 
     private static CarbonIntensityIndex ToCarbonIntensityIndex(this string index) => index.ToLowerInvariant() switch

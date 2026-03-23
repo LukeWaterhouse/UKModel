@@ -1,4 +1,4 @@
-import type { CarbonIntensityIndex, FuelType, GridRegionType } from './enums';
+import type { CarbonIntensityIndex, DnoRegion, FuelType, GridRegionType } from './enums';
 
 export interface GenerationMixEntry {
   fuelType: FuelType;
@@ -14,7 +14,7 @@ export interface IntensityData {
 
 export interface RegionIntensity {
   regionType: GridRegionType;
-  dnoRegion: string;
+  dnoRegion: DnoRegion;
   intensity: IntensityData;
   generationMix: GenerationMixEntry[];
 }

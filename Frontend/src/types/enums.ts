@@ -41,3 +41,25 @@ export const CarbonIntensityIndex = {
   VeryHigh: 4,
 } as const;
 export type CarbonIntensityIndex = (typeof CarbonIntensityIndex)[keyof typeof CarbonIntensityIndex];
+
+export const DnoRegion = {
+  ScottishHydroElectric: 0,
+  SpDistribution: 1,
+  ElectricityNorthWest: 2,
+  NpgNorthEast: 3,
+  NpgYorkshire: 4,
+  SpManweb: 5,
+  WpdSouthWales: 6,
+  WpdWestMidlands: 7,
+  WpdEastMidlands: 8,
+  UkpnEast: 9,
+  WpdSouthWest: 10,
+  SseSouth: 11,
+  UkpnLondon: 12,
+  UkpnSouthEast: 13,
+  England: 14,
+  Scotland: 15,
+  Wales: 16,
+  Gb: 17,
+} as const;
+export type DnoRegion = (typeof DnoRegion)[keyof typeof DnoRegion];

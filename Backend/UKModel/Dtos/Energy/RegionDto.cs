@@ -4,6 +4,6 @@ namespace UKModel.Api.Dtos.Energy;
 
 public record RegionDto(
     GridRegionTypeDto RegionType,
-    string DnoRegion,
+    DnoRegionDto DnoRegion,
     IntensityDto Intensity,
     IReadOnlyList<GenerationMixEntryDto> GenerationMix);
