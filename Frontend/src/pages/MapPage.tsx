@@ -89,14 +89,6 @@ const REGION_DISPLAY_NAME: Record<string, string> = {
   Wales: 'Wales',
 };
 
-const INTENSITY_COLOR_MAP: Record<number, [number, number, number, number]> = {
-  [CarbonIntensityIndex.VeryLow]: [0, 200, 0, 200],
-  [CarbonIntensityIndex.Low]: [100, 220, 50, 200],
-  [CarbonIntensityIndex.Moderate]: [255, 200, 0, 200],
-  [CarbonIntensityIndex.High]: [255, 100, 0, 200],
-  [CarbonIntensityIndex.VeryHigh]: [255, 30, 30, 200],
-};
-
 // Convert HSL (hue 0-360, saturation 0-100, lightness 0-100) to RGB [0-255, 0-255, 0-255].
 // Uses the analytical HSL→RGB formula without branching on hue sextants.
 function hslToRgb(h: number, s: number, l: number): [number, number, number] {

@@ -1,7 +1,8 @@
 import { useControl } from 'react-map-gl/maplibre';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import type { Layer } from '@deck.gl/core';
-import type { TooltipContent } from '@deck.gl/core/typed';
+
+type TooltipContent = null | string | { text?: string; html?: string; className?: string; style?: Partial<CSSStyleDeclaration> };
 
 interface DeckOverlayProps {
   layers: Layer[];

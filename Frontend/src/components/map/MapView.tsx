@@ -1,7 +1,8 @@
 import Map from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Layer } from '@deck.gl/core';
-import type { TooltipContent } from '@deck.gl/core/typed';
+
+type TooltipContent = null | string | { text?: string; html?: string; className?: string; style?: Partial<CSSStyleDeclaration> };
 import DeckOverlay from './DeckOverlay';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
