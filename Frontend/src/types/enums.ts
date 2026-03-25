@@ -63,3 +63,17 @@ export const DnoRegion = {
   Gb: 17,
 } as const;
 export type DnoRegion = (typeof DnoRegion)[keyof typeof DnoRegion];
+
+export const PlantSource = {
+  Nuclear: 0,
+  Wind: 1,
+  Solar: 2,
+  Gas: 3,
+  Coal: 4,
+  Hydro: 5,
+  Oil: 6,
+  Biomass: 7,
+  Waste: 8,
+  Biogas: 9,
+} as const;
+export type PlantSource = (typeof PlantSource)[keyof typeof PlantSource];

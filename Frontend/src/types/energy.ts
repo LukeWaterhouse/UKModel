@@ -1,4 +1,4 @@
-import type { CarbonIntensityIndex, DnoRegion, FuelType, GridRegionType } from './enums';
+import type { CarbonIntensityIndex, DnoRegion, FuelType, GridRegionType, PlantSource } from './enums';
 
 export interface GenerationMixEntry {
   fuelType: FuelType;
@@ -29,4 +29,23 @@ export interface NationalGenerationMixResponse {
   to: string;
   intensity: IntensityData;
   mix: GenerationMixEntry[];
+}
+
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
+export interface PowerPlant {
+  coordinates: Coordinates;
+  name: string;
+  operator: string | null;
+  plannedEndDate: string | null;
+  outputMW: number;
+  startDate: string | null;
+  source: PlantSource;
+}
+
+export interface PowerPlantsResponse {
+  plants: PowerPlant[];
 }

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Main building -->
+  <rect x="12" y="28" width="40" height="30" rx="2" fill="#e0e0e0" stroke="#333" stroke-width="1.5"/>
+  <!-- Smokestack -->
+  <rect x="40" y="10" width="6" height="22" fill="#ccc" stroke="#333" stroke-width="1"/>
+  <!-- Flame -->
+  <path d="M43 10 Q41 4 43 2 Q45 6 45 10" fill="#ff6b35" opacity="0.9"/>
+  <!-- Turbine symbol -->
+  <circle cx="28" cy="42" r="8" fill="none" stroke="#4a9eff" stroke-width="1.5"/>
+  <path d="M28 42 L28 34 M28 42 L34 46 M28 42 L22 46" stroke="#4a9eff" stroke-width="1.5"/>
+  <!-- Gas pipe -->
+  <rect x="4" y="44" width="10" height="4" rx="2" fill="#f5c518" stroke="#333" stroke-width="1"/>
+</svg>

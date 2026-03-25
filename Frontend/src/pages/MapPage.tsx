@@ -1,12 +1,39 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { GeoJsonLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, IconLayer } from '@deck.gl/layers';
+import { HeatmapLayer } from '@deck.gl/aggregation-layers';
+import type { PickingInfo } from '@deck.gl/core';
 import MapView from '../components/map/MapView';
 import RegionDetailPanel from '../components/map/RegionDetailPanel';
 import NationalSummary from '../components/NationalSummary';
-import { fetchRegionalIntensity, fetchNationalGenerationMix } from '../services/energyService';
-import type { RegionIntensity, NationalGenerationMixResponse } from '../types/energy';
-import { CarbonIntensityIndex, GridRegionType } from '../types/enums';
+import { fetchRegionalIntensity, fetchNationalGenerationMix, fetchPowerPlants } from '../services/energyService';
+import type { RegionIntensity, NationalGenerationMixResponse, PowerPlant } from '../types/energy';
+import { CarbonIntensityIndex, GridRegionType, PlantSource } from '../types/enums';
 import regionsGeoJson from '../assets/uk-grid-regions.geojson';
+import solarHeatmapData from '../assets/solar-heatmap.json';
+import nuclearIconUrl from '../assets/nuclear-plant-wired.svg';
+import windIconUrl from '../assets/wind-plant.svg';
+import gasIconUrl from '../assets/gas-plant.svg';
+import coalIconUrl from '../assets/coal-plant.svg';
+import hydroIconUrl from '../assets/hydro-plant.svg';
+import oilIconUrl from '../assets/oil-plant.svg';
+import biomassIconUrl from '../assets/biomass-plant.svg';
+import solarIconUrl from '../assets/solar-plant.svg';
+import wasteIconUrl from '../assets/waste-plant.svg';
+
+const PLANT_SOURCE_CONFIG: Record<PlantSource, { label: string; icon: string; emoji: string }> = {
+  [PlantSource.Nuclear]: { label: 'Nuclear', icon: nuclearIconUrl, emoji: '☢' },
+  [PlantSource.Wind]: { label: 'Wind', icon: windIconUrl, emoji: '💨' },
+  [PlantSource.Solar]: { label: 'Solar', icon: solarIconUrl, emoji: '☀' },
+  [PlantSource.Gas]: { label: 'Gas', icon: gasIconUrl, emoji: '🔥' },
+  [PlantSource.Coal]: { label: 'Coal', icon: coalIconUrl, emoji: '⛏' },
+  [PlantSource.Hydro]: { label: 'Hydro', icon: hydroIconUrl, emoji: '💧' },
+  [PlantSource.Oil]: { label: 'Oil', icon: oilIconUrl, emoji: '🛢' },
+  [PlantSource.Biomass]: { label: 'Biomass', icon: biomassIconUrl, emoji: '🌿' },
+  [PlantSource.Waste]: { label: 'Waste', icon: wasteIconUrl, emoji: '♻' },
+  [PlantSource.Biogas]: { label: 'Biogas', icon: gasIconUrl, emoji: '🌱' },
+};
+
+const PLANT_SOURCES = Object.values(PlantSource) as PlantSource[];
 
 const REGION_ID_TO_NAME = Object.fromEntries(
   Object.entries(GridRegionType).map(([name, id]) => [id, name]),
@@ -83,7 +110,27 @@ function indexToColor(index: number, actual: number | null, forecast: number): [
   const sat = 80 + t * 10;
   const lit = 48 - t * 10;
   const [r, g, b] = hslToRgb(hue, sat, lit);
-  return [r, g, b, 200];
+  return [r, g, b, 90];
+}
+
+// Scale icon size by output MW using a sqrt scale, clamped between 18–52px.
+const MIN_ICON_SIZE = 18;
+const MAX_ICON_SIZE = 52;
+const MAX_MW_REF = 4000; // Reference max MW for scaling (e.g. Drax ~3960 MW)
+
+function iconSizeFromMW(mw: number): number {
+  if (mw <= 0) return MIN_ICON_SIZE;
+  const t = Math.sqrt(Math.min(mw, MAX_MW_REF) / MAX_MW_REF);
+  return MIN_ICON_SIZE + t * (MAX_ICON_SIZE - MIN_ICON_SIZE);
+}
+
+// Minimum MW threshold at each zoom level — hides small plants when zoomed out.
+function minMWForZoom(zoom: number): number {
+  if (zoom >= 9) return 0;
+  if (zoom >= 8) return 5;
+  if (zoom >= 7) return 20;
+  if (zoom >= 6) return 100;
+  return 500;
 }
 
 export default function MapPage() {
@@ -94,7 +141,12 @@ export default function MapPage() {
   const [pinnedRegionName, setPinnedRegionName] = useState<string | null>(null);
   const [pinnedRegionKey, setPinnedRegionKey] = useState<string | null>(null);
   const [nationalMix, setNationalMix] = useState<NationalGenerationMixResponse | null>(null);
+  const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
+  const [zoom, setZoom] = useState(5);
+  const handleZoomChange = useCallback((z: number) => setZoom(Math.round(z)), []);
   const [showIntensityLayer, setShowIntensityLayer] = useState(true);
+  const [showSolarHeatmap, setShowSolarHeatmap] = useState(true);
+  const [visibleSources, setVisibleSources] = useState<Set<PlantSource>>(new Set(PLANT_SOURCES));
 
   useEffect(() => {
     fetchRegionalIntensity()
@@ -102,6 +154,9 @@ export default function MapPage() {
       .catch(console.error);
     fetchNationalGenerationMix()
       .then(setNationalMix)
+      .catch(console.error);
+    fetchPowerPlants()
+      .then((data) => setPowerPlants(data.plants))
       .catch(console.error);
   }, []);
 
@@ -152,44 +207,65 @@ export default function MapPage() {
     [lookup, pinnedRegion, pinnedRegionName],
   );
 
-  const layers = useMemo(() => {
+  const solarLayer = useMemo(() => {
+    if (!showSolarHeatmap) return [];
+    return [
+      new HeatmapLayer({
+        id: 'solar-heatmap',
+        data: solarHeatmapData as number[][],
+        getPosition: (d: number[]) => [d[0], d[1]] as [number, number],
+        getWeight: (d: number[]) => Math.sqrt(d[2]),
+        radiusPixels: 7,
+        intensity: 1,
+        threshold: 0.12,
+        colorRange: [
+          [199, 233, 180],
+          [127, 205, 187],
+          [65, 182, 196],
+          [29, 145, 192],
+          [34, 94, 168],
+          [12, 44, 132],
+        ],
+      }),
+    ];
+  }, [showSolarHeatmap]);
+
+  const intensityLayers = useMemo(() => {
     const result: GeoJsonLayer[] = [];
 
     if (!showIntensityLayer) return result;
 
-    const base = new GeoJsonLayer({
-      id: 'regional-intensity',
-      data: regionsGeoJson,
-      filled: true,
-      stroked: true,
-      getFillColor: (f) => {
-        const key = f.properties.regionType;
-        const region = lookup.get(key);
-        if (!region) return [128, 128, 128, 100];
-        const color = indexToColor(region.intensity.index, region.intensity.actual, region.intensity.forecast);
-        if (pinnedRegionKey === key) return [color[0], color[1], color[2], 255] as [number, number, number, number];
-        return color;
-      },
-      getLineColor: [40, 40, 40, 200],
-      getLineWidth: 1,
-      lineWidthMinPixels: 1,
-      pickable: true,
-      autoHighlight: true,
-      highlightColor: [255, 255, 255, 10],
-      onHover,
-      onClick,
-      updateTriggers: {
-        getFillColor: [regions, pinnedRegionKey],
-      },
-      transitions: {
-        getFillColor: { duration: 800 },
-      },
-    });
+    result.push(
+      new GeoJsonLayer({
+        id: 'regional-intensity',
+        data: regionsGeoJson,
+        filled: true,
+        stroked: true,
+        getFillColor: (f) => {
+          const key = f.properties.regionType;
+          const region = lookup.get(key);
+          if (!region) return [128, 128, 128, 100];
+          const color = indexToColor(region.intensity.index, region.intensity.actual, region.intensity.forecast);
+          if (pinnedRegionKey === key) return [color[0], color[1], color[2], 255] as [number, number, number, number];
+          return color;
+        },
+        getLineColor: [40, 40, 40, 80],
+        getLineWidth: 1,
+        lineWidthMinPixels: 1,
+        pickable: true,
+        autoHighlight: true,
+        highlightColor: [255, 255, 255, 10],
+        onHover,
+        onClick,
+        updateTriggers: {
+          getFillColor: [regions, pinnedRegionKey],
+        },
+        transitions: {
+          getFillColor: { duration: 800 },
+        },
+      }),
+    );
 
-    result.push(base);
-
-    // Render pinned highlight as a separate layer on top so neighbouring
-    // region polygons can't paint over the white border.
     if (pinnedRegionKey) {
       const pinnedFeature = (regionsGeoJson as any).features?.filter(
         (f: any) => f.properties?.regionType === pinnedRegionKey,
@@ -216,12 +292,78 @@ export default function MapPage() {
     return result;
   }, [regions, lookup, onHover, onClick, pinnedRegionKey, showIntensityLayer]);
 
+  const plantLayers = useMemo(() => {
+    const result: IconLayer<PowerPlant>[] = [];
+    const minMW = minMWForZoom(zoom);
+
+    for (const source of PLANT_SOURCES) {
+      if (!visibleSources.has(source)) continue;
+      const plants = powerPlants.filter((p) => p.source === source && p.outputMW >= minMW);
+      if (plants.length === 0) continue;
+      const config = PLANT_SOURCE_CONFIG[source];
+      result.push(
+        new IconLayer<PowerPlant>({
+          id: `plants-${source}`,
+          data: plants,
+          getIcon: () => ({
+            url: config.icon,
+            width: 64,
+            height: 64,
+            anchorY: 64,
+          }),
+          getPosition: (d) => [d.coordinates.longitude, d.coordinates.latitude],
+          getSize: (d) => iconSizeFromMW(d.outputMW),
+          sizeUnits: 'pixels',
+          pickable: true,
+        }),
+      );
+    }
+
+    return result;
+  }, [visibleSources, powerPlants, zoom]);
+
+  const allLayers = useMemo(
+    () => [...intensityLayers, ...solarLayer, ...plantLayers],
+    [intensityLayers, solarLayer, plantLayers],
+  );
+
+  const getTooltip = useCallback((info: PickingInfo) => {
+    if (!info.object || !info.layer?.id.startsWith('plants-')) return null;
+    const plant = info.object as PowerPlant;
+    const config = PLANT_SOURCE_CONFIG[plant.source];
+    return {
+      html: `
+        <div style="font-family: system-ui, sans-serif; min-width: 180px;">
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">${config.emoji} ${plant.name}</div>
+          <div style="font-size: 12px; line-height: 1.6; color: #ccc;">
+            <div><span style="color: #999;">Type:</span> ${config.label}</div>
+            ${plant.operator ? `<div><span style="color: #999;">Operator:</span> ${plant.operator}</div>` : ''}
+            <div><span style="color: #999;">Output:</span> ${plant.outputMW > 0 ? `${plant.outputMW} MW` : 'N/A'}</div>
+            ${plant.startDate ? `<div><span style="color: #999;">Started:</span> ${plant.startDate}</div>` : ''}
+            ${plant.plannedEndDate ? `<div><span style="color: #999;">Planned end:</span> ${plant.plannedEndDate}</div>` : ''}
+            <div style="margin-top: 4px; font-size: 11px; color: #666;">
+              ${plant.coordinates.latitude.toFixed(4)}°N, ${Math.abs(plant.coordinates.longitude).toFixed(4)}°${plant.coordinates.longitude < 0 ? 'W' : 'E'}
+            </div>
+          </div>
+        </div>
+      `,
+      style: {
+        backgroundColor: '#1a1a2e',
+        color: '#e0e0e0',
+        borderRadius: '8px',
+        padding: '10px 14px',
+        border: '1px solid #333',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+      },
+    };
+  }, []);
+
   return (
     <div style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}>
       <NationalSummary data={nationalMix} />
       <div style={{ display: 'flex', height: '600px' }}>
         <div style={{ flex: 1, position: 'relative' }}>
-          <MapView layers={layers} />
+          <MapView layers={allLayers} getTooltip={getTooltip} onZoomChange={handleZoomChange} />
         </div>
         <RegionDetailPanel
           region={pinnedRegion ?? hoveredRegion}
@@ -234,7 +376,7 @@ export default function MapPage() {
       <div style={layerPanelStyle}>
         <h3 style={layerPanelTitleStyle}>Layers</h3>
         <div style={layerSectionStyle}>
-          <h4 style={layerSectionTitleStyle}>Energy</h4>
+          <h4 style={layerSectionTitleStyle}>Regions</h4>
           <label style={layerToggleStyle}>
             <input
               type="checkbox"
@@ -243,6 +385,42 @@ export default function MapPage() {
               style={checkboxStyle}
             />
             Carbon Intensity
+          </label>
+        </div>
+        <div style={layerSectionStyle}>
+          <h4 style={layerSectionTitleStyle}>Power Plants</h4>
+          {PLANT_SOURCES.map((source) => {
+            const config = PLANT_SOURCE_CONFIG[source];
+            return (
+              <label key={source} style={layerToggleStyle}>
+                <input
+                  type="checkbox"
+                  checked={visibleSources.has(source)}
+                  onChange={(e) => {
+                    setVisibleSources((prev) => {
+                      const next = new Set(prev);
+                      if (e.target.checked) next.add(source);
+                      else next.delete(source);
+                      return next;
+                    });
+                  }}
+                  style={checkboxStyle}
+                />
+                {config.emoji} {config.label}
+              </label>
+            );
+          })}
+        </div>
+        <div style={layerSectionStyle}>
+          <h4 style={layerSectionTitleStyle}>Solar</h4>
+          <label style={layerToggleStyle}>
+            <input
+              type="checkbox"
+              checked={showSolarHeatmap}
+              onChange={(e) => setShowSolarHeatmap(e.target.checked)}
+              style={checkboxStyle}
+            />
+            ☀️ Solar Heatmap
           </label>
         </div>
       </div>

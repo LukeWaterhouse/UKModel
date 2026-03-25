@@ -98,4 +98,39 @@ internal static class MappingExtensions
         "very high" => CarbonIntensityIndex.VeryHigh,
         _ => CarbonIntensityIndex.Moderate
     };
+
+    public static PowerPlant ToDomain(this OverpassElement element)
+    {
+        var tags = element.Tags ?? new Dictionary<string, string>();
+
+        return new PowerPlant(
+            Coordinates: new Coordinates(element.Center?.Lat ?? 0, element.Center?.Lon ?? 0),
+            Name: tags.GetValueOrDefault("name", "Unknown"),
+            Operator: tags.GetValueOrDefault("operator"),
+            PlannedEndDate: tags.GetValueOrDefault("planned:end_date"),
+            OutputMW: ParseOutputMW(tags.GetValueOrDefault("plant:output:electricity", "")),
+            StartDate: tags.GetValueOrDefault("start_date"),
+            Source: tags.GetValueOrDefault("plant:source", "").ToPlantSource());
+    }
+
+    private static PlantSource ToPlantSource(this string source) => source.ToLowerInvariant() switch
+    {
+        "nuclear" => PlantSource.Nuclear,
+        "wind" => PlantSource.Wind,
+        "solar" => PlantSource.Solar,
+        "gas" => PlantSource.Gas,
+        "coal" => PlantSource.Coal,
+        "hydro" => PlantSource.Hydro,
+        "oil" => PlantSource.Oil,
+        "biomass" => PlantSource.Biomass,
+        "waste" => PlantSource.Waste,
+        "biogas" => PlantSource.Biogas,
+        _ => PlantSource.Gas
+    };
+
+    private static int ParseOutputMW(string output)
+    {
+        var numericPart = output.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        return int.TryParse(numericPart, out var mw) ? mw : 0;
+    }
 }

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Main building -->
+  <rect x="12" y="28" width="40" height="30" rx="2" fill="#e0e0e0" stroke="#333" stroke-width="1.5"/>
+  <!-- Smokestack -->
+  <rect x="40" y="10" width="6" height="22" fill="#ccc" stroke="#333" stroke-width="1"/>
+  <!-- Leaf symbol -->
+  <path d="M26 48 Q22 38 28 32 Q34 38 30 48 Z" fill="#4caf50" stroke="#2e7d32" stroke-width="1"/>
+  <line x1="28" y1="48" x2="28" y2="36" stroke="#2e7d32" stroke-width="1"/>
+  <!-- Wood chips -->
+  <rect x="6" y="50" width="8" height="5" rx="1" fill="#8d6e63" stroke="#333" stroke-width="0.8"/>
+  <rect x="8" y="46" width="6" height="5" rx="1" fill="#a1887f" stroke="#333" stroke-width="0.8"/>
+  <!-- Small smoke -->
+  <circle cx="43" cy="7" r="3" fill="#999" opacity="0.4"/>
+</svg>

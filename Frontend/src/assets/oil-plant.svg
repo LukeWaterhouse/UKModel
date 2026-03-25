@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Storage tank -->
+  <ellipse cx="32" cy="26" rx="18" ry="6" fill="#ccc" stroke="#333" stroke-width="1.5"/>
+  <rect x="14" y="26" width="36" height="26" fill="#e0e0e0" stroke="#333" stroke-width="1.5"/>
+  <ellipse cx="32" cy="52" rx="18" ry="6" fill="#ccc" stroke="#333" stroke-width="1.5"/>
+  <!-- Oil drop icon -->
+  <path d="M32 32 Q28 38 28 42 A4 4 0 0 0 36 42 Q36 38 32 32" fill="#333"/>
+  <!-- Pipe -->
+  <rect x="4" y="38" width="12" height="4" rx="2" fill="#999" stroke="#333" stroke-width="1"/>
+  <!-- Base -->
+  <rect x="14" y="56" width="36" height="4" rx="1" fill="#999" stroke="#333" stroke-width="1"/>
+</svg>

@@ -50,4 +50,8 @@ public static class MappingExtensions
         CarbonIntensityIndex.VeryHigh => CarbonIntensityIndexTypeDto.VeryHigh,
         _ => CarbonIntensityIndexTypeDto.Moderate
     };
+
+    public static PowerPlantDto FromDomain(this PowerPlant plant) =>
+        new(new CoordinatesDto(plant.Coordinates.Latitude, plant.Coordinates.Longitude),
+            plant.Name, plant.Operator, plant.PlannedEndDate, plant.OutputMW, plant.StartDate, (PlantSourceDto)(int)plant.Source);
 }

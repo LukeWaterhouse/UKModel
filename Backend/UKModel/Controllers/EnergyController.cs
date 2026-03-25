@@ -11,7 +11,8 @@ namespace UKModel.Api.Controllers;
 [Tags("Energy")]
 public class EnergyController(
     IRegionalCarbonIntensityService regionalService,
-    INationalGenerationMixService nationalService)
+    INationalGenerationMixService nationalService,
+    IPowerPlantService powerPlantService)
     : ControllerBase
 {
     [HttpGet("regions")]
@@ -36,6 +37,17 @@ public class EnergyController(
             To: mix.To,
             Intensity: mix.Intensity.FromDomain(),
             Mix: mix.Mix.Select(m => m.FromDomain()).ToList());
+
+        return Ok(response);
+    }
+
+    [HttpGet("power-plants")]
+    public async Task<ActionResult<PowerPlantsResponse>> GetPowerPlants(CancellationToken cancellationToken)
+    {
+        var plants = await powerPlantService.GetPlantsAsync(cancellationToken);
+
+        var response = new PowerPlantsResponse(
+            Plants: plants.Select(p => p.FromDomain()).ToList());
 
         return Ok(response);
     }
