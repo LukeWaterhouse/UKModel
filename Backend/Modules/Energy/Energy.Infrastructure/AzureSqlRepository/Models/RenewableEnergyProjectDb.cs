@@ -56,4 +56,6 @@ public class RenewableEnergyProjectDb
     public DateTime? Operational { get; set; }
     public string? HeatNetworkRef { get; set; }
     public decimal? SolarSiteAreaSqm { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

@@ -54,4 +54,14 @@ public static class MappingExtensions
     public static PowerPlantDto FromDomain(this PowerPlant plant) =>
         new(new CoordinatesDto(plant.Coordinates.Latitude, plant.Coordinates.Longitude),
             plant.Name, plant.Operator, plant.PlannedEndDate, plant.OutputMW, plant.StartDate, (PlantSourceDto)(int)plant.Source);
+
+    public static RenewableEnergyProjectDto FromDomain(this RenewableEnergyProject project) =>
+        new(new CoordinatesDto(project.Latitude ?? 0, project.Longitude ?? 0),
+            (TechnologyTypeDto)(int)(project.TechnologyType ?? TechnologyType.Unknown),
+            project.SiteName,
+            project.Operator,
+            project.InstalledCapacityMWe,
+            project.DevelopmentStatus,
+            project.Region,
+            project.Country);
 }

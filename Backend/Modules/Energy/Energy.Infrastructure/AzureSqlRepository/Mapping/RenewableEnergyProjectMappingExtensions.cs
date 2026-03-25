@@ -59,7 +59,9 @@ public static class RenewableEnergyProjectMappingExtensions
         UnderConstruction: db.UnderConstruction,
         Operational: db.Operational,
         HeatNetworkRef: db.HeatNetworkRef,
-        SolarSiteAreaSqm: db.SolarSiteAreaSqm);
+        SolarSiteAreaSqm: db.SolarSiteAreaSqm,
+        Latitude: db.Latitude,
+        Longitude: db.Longitude);
 
     public static RenewableEnergyProjectDb FromDomain(this RenewableEnergyProject domain) => new()
     {
@@ -115,6 +117,8 @@ public static class RenewableEnergyProjectMappingExtensions
         UnderConstruction = domain.UnderConstruction,
         Operational = domain.Operational,
         HeatNetworkRef = domain.HeatNetworkRef,
-        SolarSiteAreaSqm = domain.SolarSiteAreaSqm
+        SolarSiteAreaSqm = domain.SolarSiteAreaSqm,
+        Latitude = domain.Latitude,
+        Longitude = domain.Longitude
     };
 }

@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { GeoJsonLayer, IconLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import type { PickingInfo } from '@deck.gl/core';
 import MapView from '../components/map/MapView';
 import RegionDetailPanel from '../components/map/RegionDetailPanel';
 import NationalSummary from '../components/NationalSummary';
-import { fetchRegionalIntensity, fetchNationalGenerationMix, fetchPowerPlants } from '../services/energyService';
-import type { RegionIntensity, NationalGenerationMixResponse, PowerPlant } from '../types/energy';
-import { CarbonIntensityIndex, GridRegionType, PlantSource } from '../types/enums';
+import { fetchRegionalIntensity, fetchNationalGenerationMix, fetchPowerPlants, fetchRenewableProjects } from '../services/energyService';
+import type { RegionIntensity, NationalGenerationMixResponse, PowerPlant, RenewableEnergyProject } from '../types/energy';
+import { CarbonIntensityIndex, GridRegionType, PlantSource, TechnologyType } from '../types/enums';
 import regionsGeoJson from '../assets/uk-grid-regions.geojson';
 import solarHeatmapData from '../assets/solar-heatmap.json';
 import nuclearIconUrl from '../assets/nuclear-plant-wired.svg';
@@ -34,6 +34,36 @@ const PLANT_SOURCE_CONFIG: Record<PlantSource, { label: string; icon: string; em
 };
 
 const PLANT_SOURCES = Object.values(PlantSource) as PlantSource[];
+
+const TECHNOLOGY_TYPE_CONFIG: Record<TechnologyType, { label: string; color: [number, number, number]; emoji: string }> = {
+  [TechnologyType.Unknown]: { label: 'Unknown', color: [128, 128, 128], emoji: '❓' },
+  [TechnologyType.AdvancedConversionTechnologies]: { label: 'Advanced Conversion', color: [139, 69, 19], emoji: '🔄' },
+  [TechnologyType.AnaerobicDigestion]: { label: 'Anaerobic Digestion', color: [85, 107, 47], emoji: '♻️' },
+  [TechnologyType.Battery]: { label: 'Battery', color: [0, 191, 255], emoji: '🔋' },
+  [TechnologyType.BiomassCofiring]: { label: 'Biomass (Co-firing)', color: [34, 139, 34], emoji: '🌿' },
+  [TechnologyType.BiomassDedicated]: { label: 'Biomass (Dedicated)', color: [0, 128, 0], emoji: '🌳' },
+  [TechnologyType.CompressedAirEnergyStorage]: { label: 'Compressed Air', color: [135, 206, 235], emoji: '💨' },
+  [TechnologyType.EfwIncineration]: { label: 'EfW Incineration', color: [255, 69, 0], emoji: '🔥' },
+  [TechnologyType.Flywheels]: { label: 'Flywheels', color: [169, 169, 169], emoji: '⚙️' },
+  [TechnologyType.FuelCellHydrogen]: { label: 'Fuel Cell (Hydrogen)', color: [0, 255, 127], emoji: '⚡' },
+  [TechnologyType.Geothermal]: { label: 'Geothermal', color: [255, 99, 71], emoji: '🌋' },
+  [TechnologyType.HotDryRocks]: { label: 'Hot Dry Rocks', color: [205, 92, 92], emoji: '🪨' },
+  [TechnologyType.Hydrogen]: { label: 'Hydrogen', color: [0, 250, 154], emoji: '💧' },
+  [TechnologyType.LandfillGas]: { label: 'Landfill Gas', color: [154, 205, 50], emoji: '🗑️' },
+  [TechnologyType.LargeHydro]: { label: 'Large Hydro', color: [30, 144, 255], emoji: '🌊' },
+  [TechnologyType.LiquidAirEnergyStorage]: { label: 'Liquid Air', color: [173, 216, 230], emoji: '❄️' },
+  [TechnologyType.PumpedStorageHydroelectricity]: { label: 'Pumped Storage', color: [65, 105, 225], emoji: '⛰️' },
+  [TechnologyType.SewageSludgeDigestion]: { label: 'Sewage Sludge', color: [107, 142, 35], emoji: '🚰' },
+  [TechnologyType.ShorelineWave]: { label: 'Shoreline Wave', color: [0, 139, 139], emoji: '🌊' },
+  [TechnologyType.SmallHydro]: { label: 'Small Hydro', color: [100, 149, 237], emoji: '💧' },
+  [TechnologyType.SolarPhotovoltaics]: { label: 'Solar PV', color: [255, 215, 0], emoji: '☀️' },
+  [TechnologyType.TidalLagoon]: { label: 'Tidal Lagoon', color: [0, 128, 128], emoji: '🌙' },
+  [TechnologyType.TidalStream]: { label: 'Tidal Stream', color: [32, 178, 170], emoji: '🌀' },
+  [TechnologyType.WindOffshore]: { label: 'Wind Offshore', color: [70, 130, 180], emoji: '🌬️' },
+  [TechnologyType.WindOnshore]: { label: 'Wind Onshore', color: [60, 179, 113], emoji: '💨' },
+};
+
+const TECHNOLOGY_TYPES = Object.values(TechnologyType) as TechnologyType[];
 
 const REGION_ID_TO_NAME = Object.fromEntries(
   Object.entries(GridRegionType).map(([name, id]) => [id, name]),
@@ -147,6 +177,9 @@ export default function MapPage() {
   const [showIntensityLayer, setShowIntensityLayer] = useState(true);
   const [showSolarHeatmap, setShowSolarHeatmap] = useState(true);
   const [visibleSources, setVisibleSources] = useState<Set<PlantSource>>(new Set(PLANT_SOURCES));
+  const [renewableProjects, setRenewableProjects] = useState<RenewableEnergyProject[]>([]);
+  const [visibleTechTypes, setVisibleTechTypes] = useState<Set<TechnologyType>>(new Set(TECHNOLOGY_TYPES));
+  const [showRenewableProjects, setShowRenewableProjects] = useState(true);
 
   useEffect(() => {
     fetchRegionalIntensity()
@@ -157,6 +190,9 @@ export default function MapPage() {
       .catch(console.error);
     fetchPowerPlants()
       .then((data) => setPowerPlants(data.plants))
+      .catch(console.error);
+    fetchRenewableProjects()
+      .then((data) => setRenewableProjects(data.projects))
       .catch(console.error);
   }, []);
 
@@ -322,13 +358,66 @@ export default function MapPage() {
     return result;
   }, [visibleSources, powerPlants, zoom]);
 
+  const renewableProjectLayers = useMemo(() => {
+    if (!showRenewableProjects) return [];
+    const filtered = renewableProjects.filter((p) => visibleTechTypes.has(p.technologyType));
+    if (filtered.length === 0) return [];
+
+    return [
+      new ScatterplotLayer<RenewableEnergyProject>({
+        id: 'renewable-projects',
+        data: filtered,
+        getPosition: (d) => [d.coordinates.longitude, d.coordinates.latitude],
+        getFillColor: (d) => [...TECHNOLOGY_TYPE_CONFIG[d.technologyType].color, 180] as [number, number, number, number],
+        getRadius: (d) => Math.max(200, Math.sqrt((d.installedCapacityMWe ?? 1) * 1000)),
+        radiusMinPixels: 3,
+        radiusMaxPixels: 20,
+        pickable: true,
+        antialiasing: true,
+        updateTriggers: {
+          getFillColor: [visibleTechTypes],
+        },
+      }),
+    ];
+  }, [renewableProjects, showRenewableProjects, visibleTechTypes]);
+
   const allLayers = useMemo(
-    () => [...intensityLayers, ...solarLayer, ...plantLayers],
-    [intensityLayers, solarLayer, plantLayers],
+    () => [...intensityLayers, ...solarLayer, ...renewableProjectLayers, ...plantLayers],
+    [intensityLayers, solarLayer, renewableProjectLayers, plantLayers],
   );
 
   const getTooltip = useCallback((info: PickingInfo) => {
-    if (!info.object || !info.layer?.id.startsWith('plants-')) return null;
+    if (!info.object) return null;
+
+    if (info.layer?.id === 'renewable-projects') {
+      const project = info.object as RenewableEnergyProject;
+      const config = TECHNOLOGY_TYPE_CONFIG[project.technologyType];
+      return {
+        html: `
+          <div style="font-family: system-ui, sans-serif; min-width: 180px;">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">${config.emoji} ${project.siteName ?? 'Unnamed Project'}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: #ccc;">
+              <div><span style="color: #999;">Technology:</span> ${config.label}</div>
+              ${project.operator ? `<div><span style="color: #999;">Operator:</span> ${project.operator}</div>` : ''}
+              ${project.installedCapacityMWe ? `<div><span style="color: #999;">Capacity:</span> ${project.installedCapacityMWe} MW</div>` : ''}
+              ${project.developmentStatus ? `<div><span style="color: #999;">Status:</span> ${project.developmentStatus}</div>` : ''}
+              ${project.region ? `<div><span style="color: #999;">Region:</span> ${project.region}</div>` : ''}
+              ${project.country ? `<div><span style="color: #999;">Country:</span> ${project.country}</div>` : ''}
+            </div>
+          </div>
+        `,
+        style: {
+          backgroundColor: '#1a1a2e',
+          color: '#e0e0e0',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          border: '1px solid #333',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+        },
+      };
+    }
+
+    if (!info.layer?.id.startsWith('plants-')) return null;
     const plant = info.object as PowerPlant;
     const config = PLANT_SOURCE_CONFIG[plant.source];
     return {
@@ -410,6 +499,53 @@ export default function MapPage() {
               </label>
             );
           })}
+        </div>
+        <div style={layerSectionStyle}>
+          <h4 style={layerSectionTitleStyle}>Renewable Projects</h4>
+          <label style={layerToggleStyle}>
+            <input
+              type="checkbox"
+              checked={showRenewableProjects}
+              onChange={(e) => setShowRenewableProjects(e.target.checked)}
+              style={checkboxStyle}
+            />
+            Show All
+          </label>
+          {showRenewableProjects && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 4 }}>
+              {TECHNOLOGY_TYPES.map((techType) => {
+                const config = TECHNOLOGY_TYPE_CONFIG[techType];
+                return (
+                  <label key={techType} style={{ ...layerToggleStyle, fontSize: 11 }}>
+                    <input
+                      type="checkbox"
+                      checked={visibleTechTypes.has(techType)}
+                      onChange={(e) => {
+                        setVisibleTechTypes((prev) => {
+                          const next = new Set(prev);
+                          if (e.target.checked) next.add(techType);
+                          else next.delete(techType);
+                          return next;
+                        });
+                      }}
+                      style={checkboxStyle}
+                    />
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: `rgb(${config.color.join(',')})`,
+                        flexShrink: 0,
+                      }}
+                    />
+                    {config.label}
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div style={layerSectionStyle}>
           <h4 style={layerSectionTitleStyle}>Solar</h4>

@@ -1,6 +1,6 @@
-namespace Energy.Domain.Models;
+namespace UKModel.Api.Dtos.Energy.Enums;
 
-public enum TechnologyType
+public enum TechnologyTypeDto
 {
     Unknown = 0,
     AdvancedConversionTechnologies = 1,

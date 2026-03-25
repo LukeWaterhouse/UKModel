@@ -8,6 +8,8 @@ public sealed class RepdCsvMap : ClassMap<RenewableEnergyProject>
     public RepdCsvMap()
     {
         Map(m => m.Id).Ignore();
+        Map(m => m.Latitude).Ignore();
+        Map(m => m.Longitude).Ignore();
         Map(m => m.OldRefId).Name("Old Ref ID");
         Map(m => m.RefId).Name("Ref ID");
         Map(m => m.RecordLastUpdated).Name("Record Last Updated (dd/mm/yyyy)").TypeConverterOption.Format("dd/MM/yyyy");

@@ -29,7 +29,9 @@ public class RepdCsvLoader(IRenewableEnergyProjectRepository repository)
 
         await foreach (var record in csv.GetRecordsAsync<RenewableEnergyProject>(cancellationToken))
         {
-            batch.Add(record);
+            var coords = BngToWgs84Converter.Convert(record.XCoordinate, record.YCoordinate);
+            var enriched = record with { Latitude = coords?.Latitude, Longitude = coords?.Longitude };
+            batch.Add(enriched);
 
             if (batch.Count >= BatchSize)
             {

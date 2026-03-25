@@ -23,6 +23,8 @@ public class EnergyDbContext(DbContextOptions<EnergyDbContext> options) : DbCont
             entity.Property(e => e.SolarSiteAreaSqm).HasColumnType("decimal(18,4)");
             entity.Property(e => e.XCoordinate).HasColumnType("decimal(18,4)");
             entity.Property(e => e.YCoordinate).HasColumnType("decimal(18,4)");
+            entity.Property(e => e.Latitude).HasColumnType("float");
+            entity.Property(e => e.Longitude).HasColumnType("float");
         });
     }
 }

@@ -54,7 +54,9 @@ public record RenewableEnergyProject(
     DateTime? UnderConstruction,
     DateTime? Operational,
     string? HeatNetworkRef,
-    decimal? SolarSiteAreaSqm)
+    decimal? SolarSiteAreaSqm,
+    double? Latitude,
+    double? Longitude)
 {
     public RenewableEnergyProject() : this(
         0, null, 0, null, null, null, null, null,
@@ -63,5 +65,5 @@ public record RenewableEnergyProject(
         null, null, null, null, null, null, null, null,
         null, null, null, null, null, null, null, null,
         null, null, null, null, null, null, null, null,
-        null, null, null, null, null, null) { }
+        null, null, null, null, null, null, null, null) { }
 }
