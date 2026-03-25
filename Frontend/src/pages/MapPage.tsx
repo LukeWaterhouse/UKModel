@@ -197,6 +197,7 @@ export default function MapPage() {
     return map;
   }, [regions]);
 
+  //
   const onHover = useCallback(
     (info: { object?: { properties?: { regionType?: string } } }) => {
       const regionKey = info.object?.properties?.regionType ?? null;
