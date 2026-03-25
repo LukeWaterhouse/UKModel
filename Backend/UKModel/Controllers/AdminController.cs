@@ -7,12 +7,11 @@ namespace UKModel.Api.Controllers;
 [Route("api/admin")]
 public class AdminController(
     IConfiguration configuration,
-    FuelHalfHourLoader fuelHalfHourLoader) : ControllerBase
+    IServiceScopeFactory scopeFactory,
+    ILogger<AdminController> logger) : ControllerBase
 {
     [HttpPost("fuelhh/backfill")]
-    public async Task<IActionResult> BackfillFuelHalfHour(
-        [FromBody] BackfillRequest request,
-        CancellationToken cancellationToken)
+    public IActionResult BackfillFuelHalfHour([FromBody] BackfillRequest request)
     {
         var expectedKey = configuration["AdminApiKey"];
         if (string.IsNullOrEmpty(expectedKey))
@@ -28,9 +27,23 @@ public class AdminController(
         if (from > to)
             return BadRequest("'from' must be before 'to'.");
 
-        await fuelHalfHourLoader.LoadAsync(from, to, cancellationToken);
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var scope = scopeFactory.CreateScope();
+                var loader = scope.ServiceProvider.GetRequiredService<FuelHalfHourLoader>();
+                logger.LogInformation("Background backfill started: {From} to {To}", from, to);
+                await loader.LoadAsync(from, to, CancellationToken.None);
+                logger.LogInformation("Background backfill completed: {From} to {To}", from, to);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Background backfill failed: {From} to {To}", from, to);
+            }
+        });
 
-        return Ok(new { message = $"Backfill complete from {from:yyyy-MM-dd} to {to:yyyy-MM-dd}" });
+        return Accepted(new { message = $"Backfill queued from {from:yyyy-MM-dd} to {to:yyyy-MM-dd}. Check logs for progress." });
     }
 }
 
