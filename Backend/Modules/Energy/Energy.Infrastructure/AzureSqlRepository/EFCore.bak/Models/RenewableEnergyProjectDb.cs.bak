@@ -1,0 +1,59 @@
+namespace Energy.Infrastructure.AzureSqlRepository.Models;
+
+public class RenewableEnergyProjectDb
+{
+    public int Id { get; set; }
+    public string? OldRefId { get; set; }
+    public int RefId { get; set; }
+    public DateTime? RecordLastUpdated { get; set; }
+    public string? Operator { get; set; }
+    public string? SiteName { get; set; }
+    public string? TechnologyType { get; set; }
+    public string? StorageType { get; set; }
+    public int? StorageCoLocationRepdRefId { get; set; }
+    public decimal? InstalledCapacityMWe { get; set; }
+    public string? ShareCommunityScheme { get; set; }
+    public bool ChpEnabled { get; set; }
+    public int? CfdAllocationRound { get; set; }
+    public decimal? RoBandingRocPerMWh { get; set; }
+    public decimal? FitTariffPencePerKWh { get; set; }
+    public decimal? CfdCapacityMW { get; set; }
+    public decimal? TurbineCapacityMW { get; set; }
+    public int? NumberOfTurbines { get; set; }
+    public decimal? HeightOfTurbinesMetres { get; set; }
+    public string? MountingTypeForSolar { get; set; }
+    public string? DevelopmentStatus { get; set; }
+    public string? DevelopmentStatusShort { get; set; }
+    public string? ReApplyingNewRepdRef { get; set; }
+    public string? ReApplyingOldRepdRef { get; set; }
+    public string? Address { get; set; }
+    public string? County { get; set; }
+    public string? Region { get; set; }
+    public string? Country { get; set; }
+    public string? PostCode { get; set; }
+    public int? XCoordinate { get; set; }
+    public int? YCoordinate { get; set; }
+    public string? PlanningAuthority { get; set; }
+    public string? PlanningApplicationReference { get; set; }
+    public string? AppealReference { get; set; }
+    public string? SecretaryOfStateReference { get; set; }
+    public string? TypeOfSecretaryOfStateIntervention { get; set; }
+    public string? JudicialReview { get; set; }
+    public string? OffshoreWindRound { get; set; }
+    public DateTime? PlanningApplicationSubmitted { get; set; }
+    public DateTime? PlanningApplicationWithdrawn { get; set; }
+    public DateTime? PlanningPermissionRefused { get; set; }
+    public DateTime? AppealLodged { get; set; }
+    public DateTime? AppealWithdrawn { get; set; }
+    public DateTime? AppealRefused { get; set; }
+    public DateTime? AppealGranted { get; set; }
+    public DateTime? PlanningPermissionGranted { get; set; }
+    public DateTime? SecretaryOfStateIntervened { get; set; }
+    public DateTime? SecretaryOfStateRefusal { get; set; }
+    public DateTime? SecretaryOfStateGranted { get; set; }
+    public DateTime? PlanningPermissionExpired { get; set; }
+    public DateTime? UnderConstruction { get; set; }
+    public DateTime? Operational { get; set; }
+    public string? HeatNetworkRef { get; set; }
+    public decimal? SolarSiteAreaSqm { get; set; }
+}

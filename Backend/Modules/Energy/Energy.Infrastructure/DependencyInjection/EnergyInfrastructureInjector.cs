@@ -1,13 +1,16 @@
 using Energy.Domain.Services;
+using Energy.Infrastructure.AzureSqlRepository;
 using Energy.Infrastructure.ExternalApi;
 using Energy.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Energy.Infrastructure.DependencyInjection;
 
 public static class EnergyInfrastructureInjector
 {
-    public static IServiceCollection AddEnergyInfrastructureServices(this IServiceCollection services)
+    public static IServiceCollection AddEnergyInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMemoryCache();
 
@@ -28,6 +31,12 @@ public static class EnergyInfrastructureInjector
         services.AddScoped<IRegionalCarbonIntensityService, RegionalCarbonIntensityService>();
         services.AddScoped<INationalGenerationMixService, NationalGenerationMixService>();
         services.AddScoped<IPowerPlantService, PowerPlantService>();
+
+        services.AddDbContext<EnergyDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("EnergyDb"),
+                sqlOptions => sqlOptions.EnableRetryOnFailure()));
+
+        services.AddScoped<IRenewableEnergyProjectRepository, RenewableEnergyProjectRepository>();
 
         return services;
     }

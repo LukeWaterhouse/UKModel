@@ -14,7 +14,7 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-builder.Services.AddEnergyInfrastructureServices();
+builder.Services.AddEnergyInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 

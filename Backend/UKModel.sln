@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKModel.Api", "UKModel\UKModel.Api.csproj", "{1B5DD0A0-C2A9-4701-A3E4-31CF581DF8E9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{D61493E3-C125-4086-9C33-82D1FD6D6834}"
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Energy.Domain", "Modules\Energy\Energy.Domain\Energy.Domain.csproj", "{F6EE0D28-1BCD-4001-90BE-71075D9FB16E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Energy.Infrastructure", "Modules\Energy\Energy.Infrastructure\Energy.Infrastructure.csproj", "{A2935D8D-D9C5-48EA-BE69-6B78FC74433E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKModel.DbLoader", "UKModel.DbLoader\UKModel.DbLoader.csproj", "{7C062695-47CA-4733-8508-4E2485549256}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{A2935D8D-D9C5-48EA-BE69-6B78FC74433E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2935D8D-D9C5-48EA-BE69-6B78FC74433E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2935D8D-D9C5-48EA-BE69-6B78FC74433E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C062695-47CA-4733-8508-4E2485549256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C062695-47CA-4733-8508-4E2485549256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C062695-47CA-4733-8508-4E2485549256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C062695-47CA-4733-8508-4E2485549256}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
