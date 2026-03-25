@@ -7,7 +7,7 @@ public record RenewableEnergyProject(
     DateTime? RecordLastUpdated,
     string? Operator,
     string? SiteName,
-    string? TechnologyType,
+    TechnologyType? TechnologyType,
     string? StorageType,
     string? StorageCoLocationRepdRefId,
     decimal? InstalledCapacityMWe,

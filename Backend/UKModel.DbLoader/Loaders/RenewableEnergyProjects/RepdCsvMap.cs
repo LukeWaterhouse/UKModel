@@ -13,7 +13,7 @@ public sealed class RepdCsvMap : ClassMap<RenewableEnergyProject>
         Map(m => m.RecordLastUpdated).Name("Record Last Updated (dd/mm/yyyy)").TypeConverterOption.Format("dd/MM/yyyy");
         Map(m => m.Operator).Name("Operator (or Applicant)");
         Map(m => m.SiteName).Name("Site Name");
-        Map(m => m.TechnologyType).Name("Technology Type");
+        Map(m => m.TechnologyType).Name("Technology Type").TypeConverter<TechnologyTypeConverter>();
         Map(m => m.StorageType).Name("Storage Type");
         Map(m => m.StorageCoLocationRepdRefId).Name("Storage Co-location REPD Ref ID");
         Map(m => m.InstalledCapacityMWe).Name("Installed Capacity (MWelec)");
