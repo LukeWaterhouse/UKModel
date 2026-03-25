@@ -1,4 +1,4 @@
-namespace Energy.Domain.Models;
+namespace Energy.Domain.Enums;
 
 public enum GridRegionType
 {
@@ -20,4 +20,3 @@ public enum GridRegionType
     Scotland = 16,
     Wales = 17
 }
-

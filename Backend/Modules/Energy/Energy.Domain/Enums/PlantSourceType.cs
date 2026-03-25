@@ -1,6 +1,6 @@
-namespace Energy.Domain.Models;
+namespace Energy.Domain.Enums;
 
-public enum PlantSource
+public enum PlantSourceType
 {
     Nuclear,
     Wind,

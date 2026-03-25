@@ -1,7 +1,9 @@
+using Energy.Domain.Enums;
+
 namespace Energy.Domain.Models;
 
 public record GridRegion(
-    DnoRegion DnoRegion,
+    DnoRegionType DnoRegion,
     GridRegionType Region,
     CarbonIntensity Intensity,
     IReadOnlyList<GenerationMixEntry> GenerationMix);

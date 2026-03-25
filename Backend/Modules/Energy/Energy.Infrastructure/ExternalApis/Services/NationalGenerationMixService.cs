@@ -1,9 +1,10 @@
+using Energy.Domain.Enums;
+using Energy.Domain.Interfaces;
 using Energy.Domain.Models;
-using Energy.Domain.Services;
-using Energy.Infrastructure.ExternalApi;
-using Energy.Infrastructure.Mapping;
+using Energy.Infrastructure.ExternalApis.Clients;
+using Energy.Infrastructure.ExternalApis.Mapping;
 
-namespace Energy.Infrastructure.Services;
+namespace Energy.Infrastructure.ExternalApis.Services;
 
 internal sealed class NationalGenerationMixService(
     CarbonIntensityApiClient client) : INationalGenerationMixService
@@ -22,7 +23,7 @@ internal sealed class NationalGenerationMixService(
         var intItem = intensityResponse?.Data?.FirstOrDefault();
         var intensity = intItem != null
             ? intItem.Intensity.ToDomain()
-            : new CarbonIntensity(0, null, CarbonIntensityIndex.Moderate);
+            : new CarbonIntensity(0, null, CarbonIntensityIndexType.Moderate);
 
         var genItem = generationResponse?.Data;
         if (genItem == null)

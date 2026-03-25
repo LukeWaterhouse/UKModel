@@ -1,4 +1,4 @@
-namespace UKModel.DbLoader.Loaders.RenewableEnergyProjects;
+namespace UKModel.DbLoader.Shared;
 
 public static class BngToWgs84Converter
 {
@@ -26,6 +26,13 @@ public static class BngToWgs84Converter
     private const double Rz = 0.8421 / 3600.0 * Math.PI / 180.0;
     private const double S = -20.4894e-6;
 
+    /// <summary>
+    /// Converts British National Grid (BNG) easting/northing coordinates to WGS84 latitude/longitude.
+    /// Returns <c>null</c> if either input is <c>null</c> or both are zero.
+    /// </summary>
+    /// <param name="easting">The BNG easting in metres.</param>
+    /// <param name="northing">The BNG northing in metres.</param>
+    /// <returns>A tuple of (Latitude, Longitude) in decimal degrees, or <c>null</c>.</returns>
     public static (double Latitude, double Longitude)? Convert(decimal? easting, decimal? northing)
     {
         if (easting is null || northing is null)
@@ -37,18 +44,13 @@ public static class BngToWgs84Converter
         if (e == 0 && n == 0)
             return null;
 
-        // Step 1: BNG → OSGB36 lat/lon (reverse transverse Mercator)
         var (osgbLat, osgbLon) = BngToOsgb36(e, n);
-
-        // Step 2: OSGB36 lat/lon → OSGB36 cartesian
         var (x1, y1, z1) = LatLonToCartesian(osgbLat, osgbLon, 0, AiryA, AiryB);
 
-        // Step 3: Helmert transform → WGS84 cartesian
         var x2 = Tx + (1 + S) * (x1 - Rz * y1 + Ry * z1);
         var y2 = Ty + (1 + S) * (Rz * x1 + y1 - Rx * z1);
         var z2 = Tz + (1 + S) * (-Ry * x1 + Rx * y1 + z1);
 
-        // Step 4: WGS84 cartesian → WGS84 lat/lon
         var (wgsLat, wgsLon) = CartesianToLatLon(x2, y2, z2, Grs80A, Grs80B);
 
         return (wgsLat * 180.0 / Math.PI, wgsLon * 180.0 / Math.PI);
@@ -63,7 +65,6 @@ public static class BngToWgs84Converter
         var lat = Lat0;
         var m = 0.0;
 
-        // Iteratively solve for latitude
         do
         {
             lat = (n - N0 - m) / (a * F0) + lat;

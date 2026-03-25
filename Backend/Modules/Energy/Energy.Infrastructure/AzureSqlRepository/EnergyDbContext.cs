@@ -6,6 +6,7 @@ namespace Energy.Infrastructure.AzureSqlRepository;
 public class EnergyDbContext(DbContextOptions<EnergyDbContext> options) : DbContext(options)
 {
     public DbSet<RenewableEnergyProjectDb> RenewableEnergyProjects => Set<RenewableEnergyProjectDb>();
+    public DbSet<FuelHalfHourDb> FuelHalfHours => Set<FuelHalfHourDb>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +26,16 @@ public class EnergyDbContext(DbContextOptions<EnergyDbContext> options) : DbCont
             entity.Property(e => e.YCoordinate).HasColumnType("decimal(18,4)");
             entity.Property(e => e.Latitude).HasColumnType("float");
             entity.Property(e => e.Longitude).HasColumnType("float");
+        });
+
+        modelBuilder.Entity<FuelHalfHourDb>(entity =>
+        {
+            entity.ToTable("FuelHalfHours");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.StartTimeUtc, e.FuelType }).IsUnique();
+            entity.HasIndex(e => e.SettlementDate);
+            entity.Property(e => e.FuelType).HasMaxLength(20);
+            entity.Property(e => e.SourceDataset).HasMaxLength(20);
         });
     }
 }

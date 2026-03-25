@@ -1,7 +1,8 @@
+using Energy.Domain.Enums;
 using Energy.Domain.Models;
-using Energy.Infrastructure.Models.Response;
+using Energy.Infrastructure.ExternalApis.Models.Response;
 
-namespace Energy.Infrastructure.Mapping;
+namespace Energy.Infrastructure.ExternalApis.Mapping;
 
 internal static class MappingExtensions
 {
@@ -10,9 +11,9 @@ internal static class MappingExtensions
     {
         var regionType = r.ShortName.ToGridRegionType();
         return new(
-            DnoRegion: r.DnoRegion.ToDnoRegion(),
+            DnoRegion: r.DnoRegion.ToDnoRegionType(),
             Region: regionType,
-            Intensity: new CarbonIntensity(r.Intensity.Forecast, r.Intensity.Actual, r.Intensity.Index.ToCarbonIntensityIndex()),
+            Intensity: new CarbonIntensity(r.Intensity.Forecast, r.Intensity.Actual, r.Intensity.Index.ToCarbonIntensityIndexType()),
             GenerationMix: r.GenerationMix.ToDomain());
     }
 
@@ -24,7 +25,7 @@ internal static class MappingExtensions
             Mix: item.GenerationMix.ToDomain());
 
     internal static CarbonIntensity ToDomain(this IntensityItem item) =>
-        new(item.Forecast, item.Actual, item.Index.ToCarbonIntensityIndex());
+        new(item.Forecast, item.Actual, item.Index.ToCarbonIntensityIndexType());
 
 
     private static IReadOnlyList<GenerationMixEntry> ToDomain(this List<GenerationMixItem> items) =>
@@ -66,37 +67,37 @@ internal static class MappingExtensions
         _ => GridRegionType.England
     };
 
-    private static DnoRegion ToDnoRegion(this string dnoRegion) => dnoRegion switch
+    private static DnoRegionType ToDnoRegionType(this string dnoRegion) => dnoRegion switch
     {
-        "Scottish Hydro Electric Power Distribution" => DnoRegion.ScottishHydroElectric,
-        "SP Distribution" => DnoRegion.SpDistribution,
-        "Electricity North West" => DnoRegion.ElectricityNorthWest,
-        "NPG North East" => DnoRegion.NpgNorthEast,
-        "NPG Yorkshire" => DnoRegion.NpgYorkshire,
-        "SP Manweb" => DnoRegion.SpManweb,
-        "WPD South Wales" => DnoRegion.WpdSouthWales,
-        "WPD West Midlands" => DnoRegion.WpdWestMidlands,
-        "WPD East Midlands" => DnoRegion.WpdEastMidlands,
-        "UKPN East" => DnoRegion.UkpnEast,
-        "WPD South West" => DnoRegion.WpdSouthWest,
-        "SSE South" => DnoRegion.SseSouth,
-        "UKPN London" => DnoRegion.UkpnLondon,
-        "UKPN South East" => DnoRegion.UkpnSouthEast,
-        "England" => DnoRegion.England,
-        "Scotland" => DnoRegion.Scotland,
-        "Wales" => DnoRegion.Wales,
-        "GB" => DnoRegion.Gb,
-        _ => DnoRegion.Gb
+        "Scottish Hydro Electric Power Distribution" => DnoRegionType.ScottishHydroElectric,
+        "SP Distribution" => DnoRegionType.SpDistribution,
+        "Electricity North West" => DnoRegionType.ElectricityNorthWest,
+        "NPG North East" => DnoRegionType.NpgNorthEast,
+        "NPG Yorkshire" => DnoRegionType.NpgYorkshire,
+        "SP Manweb" => DnoRegionType.SpManweb,
+        "WPD South Wales" => DnoRegionType.WpdSouthWales,
+        "WPD West Midlands" => DnoRegionType.WpdWestMidlands,
+        "WPD East Midlands" => DnoRegionType.WpdEastMidlands,
+        "UKPN East" => DnoRegionType.UkpnEast,
+        "WPD South West" => DnoRegionType.WpdSouthWest,
+        "SSE South" => DnoRegionType.SseSouth,
+        "UKPN London" => DnoRegionType.UkpnLondon,
+        "UKPN South East" => DnoRegionType.UkpnSouthEast,
+        "England" => DnoRegionType.England,
+        "Scotland" => DnoRegionType.Scotland,
+        "Wales" => DnoRegionType.Wales,
+        "GB" => DnoRegionType.Gb,
+        _ => DnoRegionType.Gb
     };
 
-    private static CarbonIntensityIndex ToCarbonIntensityIndex(this string index) => index.ToLowerInvariant() switch
+    private static CarbonIntensityIndexType ToCarbonIntensityIndexType(this string index) => index.ToLowerInvariant() switch
     {
-        "very low" => CarbonIntensityIndex.VeryLow,
-        "low" => CarbonIntensityIndex.Low,
-        "moderate" => CarbonIntensityIndex.Moderate,
-        "high" => CarbonIntensityIndex.High,
-        "very high" => CarbonIntensityIndex.VeryHigh,
-        _ => CarbonIntensityIndex.Moderate
+        "very low" => CarbonIntensityIndexType.VeryLow,
+        "low" => CarbonIntensityIndexType.Low,
+        "moderate" => CarbonIntensityIndexType.Moderate,
+        "high" => CarbonIntensityIndexType.High,
+        "very high" => CarbonIntensityIndexType.VeryHigh,
+        _ => CarbonIntensityIndexType.Moderate
     };
 
     public static PowerPlant ToDomain(this OverpassElement element)
@@ -110,22 +111,22 @@ internal static class MappingExtensions
             PlannedEndDate: tags.GetValueOrDefault("planned:end_date"),
             OutputMW: ParseOutputMW(tags.GetValueOrDefault("plant:output:electricity", "")),
             StartDate: tags.GetValueOrDefault("start_date"),
-            Source: tags.GetValueOrDefault("plant:source", "").ToPlantSource());
+            Source: tags.GetValueOrDefault("plant:source", "").ToPlantSourceType());
     }
 
-    private static PlantSource ToPlantSource(this string source) => source.ToLowerInvariant() switch
+    private static PlantSourceType ToPlantSourceType(this string source) => source.ToLowerInvariant() switch
     {
-        "nuclear" => PlantSource.Nuclear,
-        "wind" => PlantSource.Wind,
-        "solar" => PlantSource.Solar,
-        "gas" => PlantSource.Gas,
-        "coal" => PlantSource.Coal,
-        "hydro" => PlantSource.Hydro,
-        "oil" => PlantSource.Oil,
-        "biomass" => PlantSource.Biomass,
-        "waste" => PlantSource.Waste,
-        "biogas" => PlantSource.Biogas,
-        _ => PlantSource.Gas
+        "nuclear" => PlantSourceType.Nuclear,
+        "wind" => PlantSourceType.Wind,
+        "solar" => PlantSourceType.Solar,
+        "gas" => PlantSourceType.Gas,
+        "coal" => PlantSourceType.Coal,
+        "hydro" => PlantSourceType.Hydro,
+        "oil" => PlantSourceType.Oil,
+        "biomass" => PlantSourceType.Biomass,
+        "waste" => PlantSourceType.Waste,
+        "biogas" => PlantSourceType.Biogas,
+        _ => PlantSourceType.Gas
     };
 
     private static int ParseOutputMW(string output)

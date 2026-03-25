@@ -3,7 +3,7 @@ using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using Energy.Infrastructure.AzureSqlRepository.Mapping;
 
-namespace UKModel.DbLoader.Loaders.RenewableEnergyProjects;
+namespace UKModel.DbLoader.Repd;
 
 public sealed class TechnologyTypeConverter : DefaultTypeConverter
 {

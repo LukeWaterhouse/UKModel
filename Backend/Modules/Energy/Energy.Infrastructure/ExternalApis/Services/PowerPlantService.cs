@@ -1,10 +1,10 @@
+using Energy.Domain.Interfaces;
 using Energy.Domain.Models;
-using Energy.Domain.Services;
-using Energy.Infrastructure.ExternalApi;
-using Energy.Infrastructure.Mapping;
+using Energy.Infrastructure.ExternalApis.Clients;
+using Energy.Infrastructure.ExternalApis.Mapping;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Energy.Infrastructure.Services;
+namespace Energy.Infrastructure.ExternalApis.Services;
 
 internal sealed class PowerPlantService(
     OverpassApiClient client,

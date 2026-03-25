@@ -2,12 +2,16 @@ using System.Globalization;
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Energy.Domain.Interfaces;
 using Energy.Domain.Models;
-using Energy.Domain.Services;
+using Microsoft.Extensions.Logging;
+using UKModel.DbLoader.Shared;
 
-namespace UKModel.DbLoader.Loaders.RenewableEnergyProjects;
+namespace UKModel.DbLoader.Repd;
 
-public class RepdCsvLoader(IRenewableEnergyProjectRepository repository)
+public class RepdCsvLoader(
+    IRenewableEnergyProjectRepository repository,
+    ILogger<RepdCsvLoader> logger)
 {
     private const int BatchSize = 1000;
 
@@ -37,7 +41,7 @@ public class RepdCsvLoader(IRenewableEnergyProjectRepository repository)
             {
                 await repository.UpsertAsync(batch, cancellationToken);
                 totalCount += batch.Count;
-                Console.WriteLine($"Upserted {totalCount} records...");
+                logger.LogInformation("Upserted {Count} records...", totalCount);
                 batch.Clear();
             }
         }
@@ -48,6 +52,6 @@ public class RepdCsvLoader(IRenewableEnergyProjectRepository repository)
             totalCount += batch.Count;
         }
 
-        Console.WriteLine($"Finished. Total records upserted: {totalCount}");
+        logger.LogInformation("Finished. Total records upserted: {Count}", totalCount);
     }
 }

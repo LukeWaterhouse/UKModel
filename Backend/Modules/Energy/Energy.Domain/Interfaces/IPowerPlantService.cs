@@ -1,6 +1,6 @@
 using Energy.Domain.Models;
 
-namespace Energy.Domain.Services;
+namespace Energy.Domain.Interfaces;
 
 public interface IPowerPlantService
 {

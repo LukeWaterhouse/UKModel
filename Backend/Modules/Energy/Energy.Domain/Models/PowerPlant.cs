@@ -1,3 +1,5 @@
+using Energy.Domain.Enums;
+
 namespace Energy.Domain.Models;
 
 public record PowerPlant(
@@ -7,4 +9,4 @@ public record PowerPlant(
     string? PlannedEndDate,
     int OutputMW,
     string? StartDate,
-    PlantSource Source);
+    PlantSourceType Source);

@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using Energy.Infrastructure.Models.Response;
+using Energy.Infrastructure.ExternalApis.Models.Response;
 
-namespace Energy.Infrastructure.ExternalApi;
+namespace Energy.Infrastructure.ExternalApis.Clients;
 
 internal sealed class CarbonIntensityApiClient(HttpClient httpClient)
 {

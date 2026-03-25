@@ -1,5 +1,5 @@
+using Energy.Domain.Interfaces;
 using Energy.Domain.Models;
-using Energy.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using UKModel.Api.Dtos.Energy;
 using UKModel.Api.Mapping;

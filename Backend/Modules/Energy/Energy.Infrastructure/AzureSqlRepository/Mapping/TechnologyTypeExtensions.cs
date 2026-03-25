@@ -1,4 +1,4 @@
-using Energy.Domain.Models;
+using Energy.Domain.Enums;
 
 namespace Energy.Infrastructure.AzureSqlRepository.Mapping;
 

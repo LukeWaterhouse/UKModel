@@ -1,7 +1,7 @@
 using CsvHelper.Configuration;
 using Energy.Domain.Models;
 
-namespace UKModel.DbLoader.Loaders.RenewableEnergyProjects;
+namespace UKModel.DbLoader.Repd;
 
 public sealed class RepdCsvMap : ClassMap<RenewableEnergyProject>
 {

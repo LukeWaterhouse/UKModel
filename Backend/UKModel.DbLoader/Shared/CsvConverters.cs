@@ -3,7 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 
-namespace UKModel.DbLoader.Loaders.RenewableEnergyProjects;
+namespace UKModel.DbLoader.Shared;
 
 public sealed class SanitizedNullableDecimalConverter : DefaultTypeConverter
 {

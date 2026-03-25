@@ -1,6 +1,6 @@
-namespace Energy.Domain.Models;
+namespace Energy.Domain.Enums;
 
-public enum DnoRegion
+public enum DnoRegionType
 {
     ScottishHydroElectric,
     SpDistribution,

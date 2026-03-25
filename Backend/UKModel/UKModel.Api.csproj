@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Modules\Energy\Energy.Infrastructure\Energy.Infrastructure.csproj" />
+      <ProjectReference Include="..\UKModel.DbLoader\UKModel.DbLoader.csproj" />
     </ItemGroup>
 
 </Project>

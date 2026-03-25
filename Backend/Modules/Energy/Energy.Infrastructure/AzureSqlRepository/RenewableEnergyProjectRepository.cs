@@ -1,5 +1,5 @@
+using Energy.Domain.Interfaces;
 using Energy.Domain.Models;
-using Energy.Domain.Services;
 using Energy.Infrastructure.AzureSqlRepository.Mapping;
 using Microsoft.EntityFrameworkCore;
 

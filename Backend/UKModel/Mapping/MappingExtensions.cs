@@ -1,3 +1,4 @@
+using Energy.Domain.Enums;
 using Energy.Domain.Models;
 using UKModel.Api.Dtos.Energy;
 using UKModel.Api.Dtos.Energy.Enums;
@@ -19,7 +20,7 @@ public static class MappingExtensions
 
     private static GridRegionTypeDto FromDomain(this GridRegionType domainType) => (GridRegionTypeDto)(int)domainType;
 
-    private static DnoRegionDto FromDomain(this DnoRegion dnoRegion) => (DnoRegionDto)(int)dnoRegion;
+    private static DnoRegionDto FromDomain(this DnoRegionType dnoRegion) => (DnoRegionDto)(int)dnoRegion;
 
     public static GenerationMixEntryDto FromDomain(this GenerationMixEntry entry) =>
         new(entry.Fuel.FromDomain(), entry.Percentage);
@@ -41,13 +42,13 @@ public static class MappingExtensions
         _ => FuelTypeDto.Other
     };
 
-    private static CarbonIntensityIndexTypeDto FromDomain(this CarbonIntensityIndex intensityIndex) => intensityIndex switch
+    private static CarbonIntensityIndexTypeDto FromDomain(this CarbonIntensityIndexType intensityIndex) => intensityIndex switch
     {
-        CarbonIntensityIndex.VeryLow => CarbonIntensityIndexTypeDto.VeryLow,
-        CarbonIntensityIndex.Low => CarbonIntensityIndexTypeDto.Low,
-        CarbonIntensityIndex.Moderate => CarbonIntensityIndexTypeDto.Moderate,
-        CarbonIntensityIndex.High => CarbonIntensityIndexTypeDto.High,
-        CarbonIntensityIndex.VeryHigh => CarbonIntensityIndexTypeDto.VeryHigh,
+        CarbonIntensityIndexType.VeryLow => CarbonIntensityIndexTypeDto.VeryLow,
+        CarbonIntensityIndexType.Low => CarbonIntensityIndexTypeDto.Low,
+        CarbonIntensityIndexType.Moderate => CarbonIntensityIndexTypeDto.Moderate,
+        CarbonIntensityIndexType.High => CarbonIntensityIndexTypeDto.High,
+        CarbonIntensityIndexType.VeryHigh => CarbonIntensityIndexTypeDto.VeryHigh,
         _ => CarbonIntensityIndexTypeDto.Moderate
     };
 
