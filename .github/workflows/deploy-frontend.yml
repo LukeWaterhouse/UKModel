@@ -33,17 +33,6 @@ jobs:
           VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: npm run build
 
-      - name: Install OIDC client
-        run: npm install @actions/core@1.6.0 @actions/http-client
-
-      - name: Get GitHub OIDC token
-        uses: actions/github-script@v6
-        id: idtoken
-        with:
-          script: |
-              return await core.getIDToken()
-          result-encoding: string
-
       - name: Deploy to Azure Static Web App
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -51,4 +40,3 @@ jobs:
           action: upload
           app_location: Frontend/dist
           skip_app_build: true
-          github_id_token: ${{ steps.idtoken.outputs.result }}
