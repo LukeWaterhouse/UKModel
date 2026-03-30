@@ -1,6 +1,6 @@
 import type { NationalGenerationMixResponse, PowerPlantsResponse, RegionalIntensityResponse, RenewableEnergyProjectsResponse } from '../types/energy';
 
-const API_BASE = 'http://localhost:5003';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5003';
 
 export async function fetchRegionalIntensity(): Promise<RegionalIntensityResponse> {
   const response = await fetch(`${API_BASE}/api/v1/energy/regions`);
